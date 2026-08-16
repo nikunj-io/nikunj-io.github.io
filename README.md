@@ -1,14 +1,14 @@
-# prajapati-nikunj.github.io
+# nikunj-io.github.io
 
-Personal portfolio site of Nikunj Prajapati — Lead iOS Software Engineer & iOS Architect.
+Personal portfolio site of Nikunj Prajapati - Lead iOS Software Engineer & iOS Architect.
 
-**Live:** https://prajapati-nikunj.github.io/
+**Live:** https://nikunj-io.github.io/
 
 ## About this repository
 
 This repository contains the published website only: static HTML, CSS, one
 progressive-enhancement script, and image assets. There is no build step, no
-package manager, and no server-side component — GitHub Pages serves these files
+package manager, and no server-side component - GitHub Pages serves these files
 directly.
 
 ## Structure

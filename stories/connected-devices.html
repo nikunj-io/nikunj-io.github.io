@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>When software has to listen to the physical world. · Nikunj Prajapati</title>
+  <meta name="description" content="Bluetooth peripherals and on-device sensors throw off a constant stream of
+            readings, and not one of them is trustworthy on its own.">
+  <link rel="canonical" href="https://nikunj-io.github.io/stories/connected-devices.html">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#050a0f">
+  <meta name="color-scheme" content="dark">
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self' 'sha256-ZpWgbRrl+DTWFgl8YFfuvN1ZmxDCnrmzUiUAhx2IDSs='; font-src 'self'; connect-src https://firestore.googleapis.com; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; upgrade-insecure-requests">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="When software has to listen to the physical world.">
+  <meta property="og:description" content="Bluetooth peripherals and on-device sensors throw off a constant stream of
+            readings, and not one of them is trustworthy on its own.">
+  <meta property="og:url" content="https://nikunj-io.github.io/stories/connected-devices.html">
+  <meta property="og:image" content="https://nikunj-io.github.io/assets/img/portrait.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/site.css?v=30">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "When software has to listen to the physical world.",
+    "description": "Bluetooth peripherals and on-device sensors throw off a constant stream of
+            readings, and not one of them is trustworthy on its own.",
+    "author": { "@type": "Person", "name": "Nikunj Prajapati" },
+    "isPartOf": { "@type": "WebSite", "name": "Nikunj Prajapati", "url": "https://nikunj-io.github.io/" }
+  }
+  </script>
+</head>
+
+<body class="story-page" data-mail-subject="Project enquiry: Connected devices">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <canvas class="ambient" aria-hidden="true"></canvas>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="../index.html">
+        <img class="brand__mark" src="../assets/img/np-mark.webp" alt="" width="320" height="319" decoding="async">
+        <span class="brand__text">
+          <span class="brand__name">NIKUNJ PRAJAPATI</span>
+          <span class="brand__role">iOS Architect &amp; Engineer</span>
+        </span>
+      </a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke-linecap="round"/></svg>
+      </button>
+      <nav class="nav" id="primary-nav" aria-label="Primary">
+        <a class="nav__link" href="../index.html#stories">STORIES</a>
+        <a class="nav__link" href="../index.html#systems">SYSTEMS</a>
+        <a class="nav__link" href="../index.html#about">ABOUT</a>
+        <a class="nav__link" href="../index.html#contact">CONTACT</a>
+      </nav>
+      <a class="status-pill" href="../index.html#contact">
+        <span class="status-dot" aria-hidden="true"></span>OPEN TO NEW OPPORTUNITIES
+      </a>
+    </div>
+  </header>
+
+  <main id="main">
+    <article class="sp">
+      <header class="sp__head">
+        <div class="wrap sp__headGrid">
+          <div>
+            <a class="sp__back" href="../index.html#stories">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              All stories
+            </a>
+            <p class="sp__gutter">05 / CONNECTED DEVICES</p>
+            <h1 class="sp__title">When software has to listen to the physical world.</h1>
+            <p class="sp__lead">Bluetooth peripherals and on-device sensors throw off a constant stream of
+            readings, and not one of them is trustworthy on its own.</p>
+            <ul class="tags sp__tags"><li class="tag tag--accent">CORE BLUETOOTH</li><li class="tag">BLE</li>
+            <li class="tag">SENSOR STREAMS</li><li class="tag">REAL-TIME</li>
+            <li class="tag">SIGNAL PROCESSING</li></ul>
+          </div>
+          <div class="sp__art" aria-hidden="true"><svg viewBox="0 0 300 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+  <rect width="300" height="200" fill="#04222a"/>
+  <rect x="18" y="70" width="72" height="56" rx="7" fill="#062730" stroke="#00e5a0" stroke-opacity=".4"/>
+  <g fill="#00e5a0" fill-opacity=".35"><rect x="28" y="80" width="24" height="18" rx="2"/><rect x="58" y="80" width="20" height="10" rx="2"/><rect x="28" y="104" width="50" height="4" rx="2"/><rect x="28" y="112" width="34" height="4" rx="2"/></g>
+  <g fill="none" stroke="#00e5a0" stroke-opacity=".55" stroke-linecap="round"><path d="M96 88a14 14 0 0 1 0 20"/><path d="M104 80a24 24 0 0 1 0 36"/></g>
+  <text x="54" y="142" text-anchor="middle" font-family="ui-monospace,monospace" font-size="6" fill="#4b5c72">BLE DEVICE</text>
+  <rect x="196" y="30" width="88" height="140" rx="10" fill="#052229" stroke="#00e5a0" stroke-opacity=".45"/>
+  <text x="206" y="48" font-family="ui-monospace,monospace" font-size="6" fill="#4b5c72">LIVE DATA</text>
+  <g fill="none" stroke-width="1.2">
+    <polyline stroke="#6b7f96" stroke-opacity=".65" points="206,72 218,62 230,78 242,58 254,74 266,64 276,70"/>
+    <polyline stroke="#6b7f96" stroke-opacity=".5" points="206,104 218,112 230,96 242,110 254,98 266,108 276,102"/>
+    <polyline stroke="#00e5a0" stroke-width="1.7" points="206,140 222,140 238,139 254,140 270,140 276,140"/>
+  </g>
+  <text x="206" y="60" font-family="ui-monospace,monospace" font-size="5.5" fill="#4b5c72">SENSOR 01</text>
+  <text x="206" y="92" font-family="ui-monospace,monospace" font-size="5.5" fill="#4b5c72">SENSOR 02</text>
+  <text x="240" y="132" font-family="ui-monospace,monospace" font-size="5.5" fill="#00e5a0">FUSED</text>
+  <g stroke="#00e5a0" stroke-opacity=".22" stroke-dasharray="3 4"><path d="M120 98h70"/></g>
+</svg></div>
+        </div>
+      </header>
+
+      <!-- The problem, beside the state diagram it describes -->
+      <section class="band">
+        <div class="wrap band__grid">
+          <div class="band__text reveal">
+            <p class="band__label">The problem</p>
+            <p>Signals drop. Devices vanish mid-session and come back with a different
+              identifier. Readings turn up out of order, duplicated, or stamped with a
+              clock that disagrees with the phone. Taken alone, any single one is a poor
+              basis for a decision.</p>
+          </div>
+          <figure class="figpanel reveal"><figcaption class="figpanel__cap"><span>Fig. 09 / Independent streams</span><span>Live capture</span></figcaption>
+          <svg viewBox="0 0 320 150" width="100%" height="150" role="img"
+               aria-label="Three noisy sensor traces converging into one steady fused signal">
+            <defs><linearGradient id="fade" x1="0" x2="1">
+              <stop offset="0" stop-color="#00e5a0" stop-opacity=".25"/>
+              <stop offset="1" stop-color="#00e5a0" stop-opacity="1"/>
+            </linearGradient></defs>
+            <line x1="0" y1="38" x2="320" y2="38" stroke="rgba(255,255,255,.06)"/>
+            <line x1="0" y1="76" x2="320" y2="76" stroke="rgba(255,255,255,.06)"/>
+            <line x1="0" y1="114" x2="320" y2="114" stroke="rgba(255,255,255,.06)"/>
+            <polyline fill="none" stroke="#6b7f96" stroke-width="1.2"
+              points="0,40 20,30 40,46 60,26 80,44 100,32 120,50 140,28 160,42 180,34 200,46 220,30 240,44 260,36 280,40 300,34 320,38"/>
+            <polyline fill="none" stroke="#6b7f96" stroke-width="1.2"
+              points="0,78 20,88 40,68 60,86 80,72 100,90 120,66 140,84 160,74 180,88 200,70 220,82 240,76 260,86 280,72 300,80 320,76"/>
+            <polyline fill="none" stroke="#6b7f96" stroke-width="1.2"
+              points="0,116 20,106 40,122 60,104 80,120 100,108 120,124 140,106 160,118 180,110 200,122 220,108 240,120 260,112 280,118 300,110 320,114"/>
+            <polyline fill="none" stroke="url(#fade)" stroke-width="2"
+              points="0,76 40,76 80,76 120,76 160,76 200,75 240,76 280,76 320,76"/>
+            <text x="4" y="16" fill="#4b5c72" font-size="8" font-family="ui-monospace, monospace">SENSOR 01</text>
+            <text x="4" y="60" fill="#4b5c72" font-size="8" font-family="ui-monospace, monospace">SENSOR 02</text>
+            <text x="4" y="98" fill="#4b5c72" font-size="8" font-family="ui-monospace, monospace">SENSOR 03</text>
+            <text x="248" y="70" fill="#00e5a0" font-size="8" font-family="ui-monospace, monospace">FUSED</text>
+          </svg></figure>
+        </div>
+      </section>
+
+      <!-- Step-by-step walk through that diagram -->
+      <section class="band band--alt">
+        <div class="wrap">
+          <p class="band__label reveal">How a decision gets made</p>
+          <ol class="steps">
+            <li class="step">
+              <span class="step__n">01</span>
+              <div class="step__body">
+                <h3 class="step__name">RAW STREAMS</h3>
+                <p class="step__text">Readings arrive late, duplicated, out of order, and sometimes from a device that has reconnected under a new identifier.</p>
+              </div>
+            </li>
+            <li class="step">
+              <span class="step__n">02</span>
+              <div class="step__body">
+                <h3 class="step__name">TIME ALIGNMENT</h3>
+                <p class="step__text">Everything is buffered into a common window and stamped against one clock, so the streams can be compared at all.</p>
+              </div>
+            </li>
+            <li class="step">
+              <span class="step__n">03</span>
+              <div class="step__body">
+                <h3 class="step__name">CROSS-CHECK</h3>
+                <p class="step__text">Sources are compared against each other. Agreement raises confidence, and disagreement is recorded rather than smoothed away.</p>
+              </div>
+            </li>
+            <li class="step">
+              <span class="step__n">04</span>
+              <div class="step__body">
+                <h3 class="step__name">DECISION</h3>
+                <p class="step__text">Acted on only when enough independent sources concur. A single reading is never enough on its own.</p>
+              </div>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- The approach, beside the architecture diagram -->
+      <section class="band">
+        <div class="wrap band__grid band__grid--flip">
+          <figure class="figpanel reveal"><figcaption class="figpanel__cap mt-3"><span>Fig. 10 / Decision path</span><span>Never on one reading</span></figcaption>
+          <div class="flow">
+            <p class="flow__step">RAW STREAMS <b>noisy, unordered</b></p>
+            <span class="flow__arrow" aria-hidden="true"></span>
+            <p class="flow__step">TIME ALIGNMENT <b>buffered window</b></p>
+            <span class="flow__arrow" aria-hidden="true"></span>
+            <p class="flow__step flow__step--live">CROSS-CHECK <b>sources compared</b></p>
+            <span class="flow__arrow" aria-hidden="true"></span>
+            <p class="flow__step flow__step--work">DECISION <b>with confidence</b></p>
+          </div></figure>
+          <div class="band__text reveal">
+            <p class="band__label">The approach</p>
+            <p>So nothing acts on one reading. Streams get buffered, lined up in time, and
+              checked against each other. When independent sources agree, confidence goes
+              up. When they don't, that's useful too: it usually means a sensor has
+              drifted or a connection is on its way out.</p>
+            <p>The connection lifecycle ends up being most of the work. Reconnect cleanly,
+              pick up without losing the window, and never let a dropout look to the user
+              like a wrong answer.</p>
+            <p class="pull">One sensor gives you a reading. Several that agree give you something you
+            can act on.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- What was actually difficult -->
+      <section class="band band--alt">
+        <div class="wrap sp__hard reveal">
+          <p class="band__label">The part that took the longest</p>
+          <p class="sp__hardText">The connection lifecycle. Reconnecting cleanly, resuming without losing the window, and never letting a dropout look like a wrong answer.</p>
+        </div>
+      </section>
+
+      <section class="band">
+        <div class="wrap">
+          <p class="band__label reveal">What the work involved</p>
+          <ul class="facts reveal"><li class="fact"><strong>The constraint</strong><p>Readings arrive late, duplicated, or from a device that just reconnected.</p></li>
+          <li class="fact"><strong>The engineering</strong><p>Buffering, time alignment, cross-source agreement and connection lifecycle handling.</p></li>
+          <li class="fact"><strong>The ownership</strong><p>The stream pipeline, confidence scoring and reconnect behaviour.</p></li>
+          <li class="fact"><strong>The outcome</strong><p>Decisions backed by several sources rather than one hopeful reading.</p></li></ul>
+        </div>
+      </section>
+
+      <nav class="wrap pager reveal" aria-label="More stories">
+        <a class="pager__link pager__link--prev" href="agentic-workflows.html"><span class="pager__dir">Previous</span><span class="pager__t">An assistant is useful when it can do something.</span></a>
+        <span></span>
+      </nav>
+
+      <div class="wrap sp__cta reveal">
+        <p class="sp__ctaTitle">Working on something like this?</p>
+        <a class="btn js-mail" href="https://www.linkedin.com/in/nikunjprajapati" target="_blank" rel="noopener noreferrer">
+          LET'S TALK
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17 8l4 4m0 0l-4 4m4-4H3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+      </div>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <p>© <span class="js-year">2026</span> Nikunj Prajapati</p>
+    <p class="visits" hidden>
+      <span class="visits__dot" aria-hidden="true"></span>
+      <span class="js-visits">0</span> visits
+    </p>
+  </footer>
+  <script src="../js/site.js?v=20" defer></script>
+</body>
+</html>

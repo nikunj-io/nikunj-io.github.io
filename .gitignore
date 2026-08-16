@@ -28,6 +28,7 @@
 !/.nojekyll
 !/index.html
 !/404.html
+!/evolution.html
 !/robots.txt
 !/sitemap.xml
 !/README.md
@@ -39,7 +40,19 @@
 !/assets/img/
 /assets/img/*
 !/assets/img/portrait.jpg
+!/assets/img/portrait-cutout.webp
+!/assets/img/np-mark.webp
+!/assets/img/contact-scene.webp
 !/assets/img/favicon.svg
+
+# ---- 3b. stories/ -----------------------------------------------------------
+!/stories/
+/stories/*
+!/stories/offline-field-systems.html
+!/stories/spatial-measurement.html
+!/stories/enterprise-modernisation.html
+!/stories/agentic-workflows.html
+!/stories/connected-devices.html
 
 # ---- 4. css/ ----------------------------------------------------------------
 !/css/

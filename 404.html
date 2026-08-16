@@ -3,19 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Not found — Nikunj Prajapati</title>
+  <title>Not found · Nikunj Prajapati</title>
   <meta name="robots" content="noindex">
   <meta name="theme-color" content="#05070a">
   <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'none'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+        content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src https://firestore.googleapis.com; object-src 'none'; base-uri 'none'; form-action 'none'">
   <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="css/site.css">
+  <link rel="stylesheet" href="css/site.css?v=30">
 </head>
-<body>
-  <main id="main" class="contact" style="min-height:100vh;display:grid;place-items:center;">
+<body data-mail-subject="Project enquiry">
+  <canvas class="ambient" aria-hidden="true"></canvas>
+  <main id="main" class="contact fullscreen-center">
     <div class="wrap">
       <p class="eyebrow">404</p>
-      <h1 class="contact__title" style="margin-top:var(--s-3)">This page doesn't exist.</h1>
+      <h1 class="contact__title mt-3">This page doesn't exist.</h1>
       <p class="contact__copy">The link may be out of date, or the page may have moved.</p>
       <a class="btn" href="/">
         BACK TO HOME
@@ -25,5 +26,14 @@
       </a>
     </div>
   </main>
+
+  <footer class="site-footer">
+    <p>© <span class="js-year">2026</span> Nikunj Prajapati</p>
+    <p class="visits" hidden>
+      <span class="visits__dot" aria-hidden="true"></span>
+      <span class="js-visits">0</span> visits
+    </p>
+  </footer>
+  <script src="js/site.js?v=20" defer></script>
 </body>
 </html>
