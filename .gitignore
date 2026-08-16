@@ -1,0 +1,131 @@
+# =============================================================================
+# Deny-by-default .gitignore for a public GitHub Pages repository.
+#
+# Strategy: deny everything, then re-allow an explicit allowlist of individual
+# files. A new file is invisible to git until someone adds a rule for it on
+# purpose. This inverts the usual failure mode, where a forgotten pattern
+# silently leaks a file.
+#
+# IMPORTANT — how this actually works:
+#   `/*` only denies TOP-LEVEL entries. The moment a directory is re-allowed,
+#   git descends into it and its contents are no longer covered. So every
+#   allowed directory must be re-denied with `dir/*` before naming the files
+#   inside it. Miss that step and the whole allowlist quietly fails open.
+#
+#   Files are named INDIVIDUALLY rather than by extension. An extension glob
+#   such as `!/assets/img/*.png` re-allows every PNG dropped into that
+#   directory — including one whose filename names a client.
+#
+# To publish a new asset: add an explicit `!` rule for it. Nothing else works.
+# Verify with:  git add -A && git diff --cached --name-only
+# =============================================================================
+
+# ---- 1. Deny everything at the root -----------------------------------------
+/*
+
+# ---- 2. Re-allow root-level published files ---------------------------------
+!/.gitignore
+!/.nojekyll
+!/index.html
+!/404.html
+!/robots.txt
+!/sitemap.xml
+!/README.md
+!/LICENSE
+
+# ---- 3. assets/ -------------------------------------------------------------
+!/assets/
+/assets/*
+!/assets/img/
+/assets/img/*
+!/assets/img/portrait.jpg
+!/assets/img/favicon.svg
+
+# ---- 4. css/ ----------------------------------------------------------------
+!/css/
+/css/*
+!/css/site.css
+
+# ---- 5. js/ -----------------------------------------------------------------
+!/js/
+/js/*
+!/js/site.js
+
+# ---- 6. Backstop denies -----------------------------------------------------
+# The allowlist above should already exclude all of these. They are repeated as
+# defence in depth, so that a future edit which loosens the allowlist does not
+# immediately expose secrets, source maps or private tooling.
+
+# Secrets and credentials
+**/.env
+**/.env.*
+**/*.pem
+**/*.key
+**/*.p12
+**/*.pfx
+**/*.mobileprovision
+**/*.jks
+**/*.keystore
+**/id_rsa*
+**/id_ed25519*
+**/*credential*
+**/*secret*
+**/*token*
+**/.npmrc
+**/.netrc
+
+# Source maps and build metadata — never publish these
+**/*.map
+**/stats.json
+**/build-manifest.json
+
+# Tooling / editor / agent configuration
+**/.claude/
+**/.cursor/
+**/.vscode/
+**/.idea/
+**/.github/
+**/CLAUDE.md
+**/AGENTS.md
+
+# OS and editor noise
+**/.DS_Store
+**/Thumbs.db
+**/desktop.ini
+**/*.swp
+**/*~
+
+# Logs, dumps, archives, backups
+**/*.log
+**/*.bak
+**/*.orig
+**/*.rej
+**/*.zip
+**/*.tar
+**/*.tar.gz
+**/*.bundle
+**/*.sql
+**/*.sqlite*
+
+# Documents that tend to carry private content
+**/*.pdf
+**/*.docx
+**/*.xlsx
+**/*.pptx
+
+# Raw / original media (unstripped metadata risk)
+**/*.heic
+**/*.tiff
+**/*.raw
+**/*.psd
+**/*-original.*
+**/*-raw.*
+
+# Dependencies and build systems have no place in this repo
+**/node_modules/
+**/package.json
+**/package-lock.json
+**/yarn.lock
+**/pnpm-lock.yaml
+**/dist/
+**/build/

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://prajapati-nikunj.github.io/sitemap.xml

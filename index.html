@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Nikunj Prajapati — iOS Architect &amp; Engineer</title>
+  <meta name="description" content="Lead iOS engineer and architect building reliable Apple-platform systems for offline-first field work, spatial computing, on-device ML and agentic AI.">
+  <link rel="canonical" href="https://prajapati-nikunj.github.io/">
+
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#05070a">
+  <meta name="color-scheme" content="dark">
+
+  <!--
+    Content Security Policy: everything is same-origin, no third-party runtime.
+    The sha256 hash whitelists the JSON-LD block below, which CSP otherwise
+    blocks as inline script. Recompute the hash if that block is edited:
+      perl -0777 -ne 'print $1 if /<script type="application\/ld\+json">(.*?)<\/script>/s' index.html \
+        | openssl dgst -sha256 -binary | openssl base64 -A
+  -->
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self' 'sha256-PuOUFBTQCUFMP9F/wpD9MLnjlfkraT69TwAR79UAEoA='; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; upgrade-insecure-requests">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+
+  <!-- Open Graph / social -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Nikunj Prajapati">
+  <meta property="og:title" content="Nikunj Prajapati — iOS Architect &amp; Engineer">
+  <meta property="og:description" content="I build software for the moments when ordinary software breaks.">
+  <meta property="og:url" content="https://prajapati-nikunj.github.io/">
+  <meta property="og:image" content="https://prajapati-nikunj.github.io/assets/img/portrait.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Nikunj Prajapati — iOS Architect &amp; Engineer">
+  <meta name="twitter:description" content="I build software for the moments when ordinary software breaks.">
+  <meta name="twitter:image" content="https://prajapati-nikunj.github.io/assets/img/portrait.jpg">
+
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/img/portrait.jpg">
+  <link rel="preload" as="image" href="assets/img/portrait.jpg" fetchpriority="high">
+  <link rel="stylesheet" href="css/site.css">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "Nikunj Prajapati",
+    "jobTitle": "Lead iOS Software Engineer & iOS Architect",
+    "url": "https://prajapati-nikunj.github.io/",
+    "image": "https://prajapati-nikunj.github.io/assets/img/portrait.jpg",
+    "sameAs": [
+      "https://www.linkedin.com/in/nikunjprajapati",
+      "https://github.com/prajapati-nikunj"
+    ],
+    "knowsAbout": [
+      "iOS engineering", "Swift", "SwiftUI", "Offline-first architecture",
+      "Spatial computing", "ARKit", "LiDAR", "Core ML", "Agentic AI systems"
+    ]
+  }
+  </script>
+</head>
+
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- ================= HEADER ================= -->
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="#top">
+        <span class="brand__mark" aria-hidden="true">NP</span>
+        <span>
+          <span class="brand__name">NIKUNJ PRAJAPATI</span>
+          <span class="brand__role">iOS Architect &amp; Engineer</span>
+        </span>
+      </a>
+
+      <button class="nav-toggle" type="button"
+              aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M4 7h16M4 12h16M4 17h16" stroke-linecap="round"/>
+        </svg>
+      </button>
+
+      <nav class="nav" id="primary-nav" aria-label="Primary">
+        <a class="nav__link" href="#stories">STORIES</a>
+        <a class="nav__link" href="#systems">SYSTEMS</a>
+        <a class="nav__link" href="#about">ABOUT</a>
+        <a class="nav__link" href="#contact">CONTACT</a>
+      </nav>
+
+      <a class="status-pill" href="#contact">
+        <span class="status-dot" aria-hidden="true"></span>
+        OPEN TO NEW OPPORTUNITIES
+      </a>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- ================= HERO ================= -->
+    <section class="hero" id="top">
+      <div class="wrap hero__grid">
+        <div>
+          <h1 class="hero__title">
+            I build software for the moments when ordinary software <em>breaks.</em>
+          </h1>
+
+          <p class="hero__copy">
+            I architect and ship reliable iOS systems that work in the real world —
+            offline, in harsh conditions, with sensors, spatial computing and AI that
+            actually takes action.
+          </p>
+
+          <dl class="stats">
+            <div class="stat">
+              <dt class="stat__label">Apps Shipped</dt>
+              <dd class="stat__value">52+</dd>
+            </div>
+            <div class="stat">
+              <dt class="stat__label">Years Experience</dt>
+              <dd class="stat__value">10+</dd>
+            </div>
+            <div class="stat">
+              <dt class="stat__label">Engineers Mentored</dt>
+              <dd class="stat__value">7</dd>
+            </div>
+          </dl>
+
+          <a class="scroll-cue" href="#stories">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M19 14l-7 7m0 0l-7-7m7 7V3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            SCROLL TO EXPLORE
+          </a>
+        </div>
+
+        <div class="hero__media">
+          <div class="portrait-frame">
+            <img class="portrait"
+                 src="assets/img/portrait.jpg"
+                 alt="Portrait of Nikunj Prajapati"
+                 width="720" height="900"
+                 fetchpriority="high" decoding="async">
+
+            <figure class="telemetry" aria-hidden="true">
+              <figcaption class="telemetry__title">LiDAR Point Cloud</figcaption>
+              <p class="telemetry__sub">REAL-WORLD DEPTH</p>
+              <div class="telemetry__wave">
+                <i style="height:30%"></i><i style="height:55%"></i><i style="height:80%"></i>
+                <i style="height:45%"></i><i style="height:70%"></i><i style="height:95%"></i>
+                <i style="height:40%"></i><i style="height:65%"></i><i style="height:35%"></i>
+                <i style="height:60%"></i><i style="height:85%"></i><i style="height:50%"></i>
+                <i style="height:75%"></i><i style="height:42%"></i><i style="height:68%"></i>
+              </div>
+              <p class="telemetry__read">
+                <span>X: 12.42 m</span><span>Y: -8.21 m</span><span>Z: 3.17 m</span>
+              </p>
+            </figure>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= PROBLEMS ================= -->
+    <section class="section--band" aria-label="The kinds of problems I work on">
+      <div class="wrap problems" style="padding-block: var(--s-6);">
+        <h2 class="problems__label">THE PROBLEMS<br>I LIKE ARE<br>RARELY CLEAN.</h2>
+
+        <ul class="problems__grid">
+          <li class="problem">
+            <span class="problem__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <span>
+              <span class="problem__name">No signal.</span>
+              <span class="problem__note">Work must continue offline.</span>
+            </span>
+          </li>
+          <li class="problem">
+            <span class="problem__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3v2.25m6.364 1.386l-1.591 1.591M21 12h-2.25m-1.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <span>
+              <span class="problem__name">Bad lighting.</span>
+              <span class="problem__note">The real world isn't perfect.</span>
+            </span>
+          </li>
+          <li class="problem">
+            <span class="problem__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <span>
+              <span class="problem__name">Legacy code.</span>
+              <span class="problem__note">Systems older than the team.</span>
+            </span>
+          </li>
+          <li class="problem">
+            <span class="problem__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <span>
+              <span class="problem__name">Data at scale.</span>
+              <span class="problem__note">Large record sets, every day.</span>
+            </span>
+          </li>
+          <li class="problem">
+            <span class="problem__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9.348 14.652a3.75 3.75 0 010-5.304m5.304 0a3.75 3.75 0 010 5.304m-7.425 2.121a6.75 6.75 0 010-9.546m9.546 0a6.75 6.75 0 010 9.546M5.106 18.894c-3.808-3.808-3.808-9.98 0-13.788m13.788 0c3.808 3.808 3.808 9.98 0 13.788" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <span>
+              <span class="problem__name">Real-world sensors.</span>
+              <span class="problem__note">Unreliable. Noisy. Unpredictable.</span>
+            </span>
+          </li>
+          <li class="problem">
+            <span class="problem__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <span>
+              <span class="problem__name">AI that has to act.</span>
+              <span class="problem__note">Not just chat, but take action.</span>
+            </span>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ================= STORIES ================= -->
+    <section class="section" id="stories" aria-labelledby="stories-title">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div>
+            <p class="eyebrow">Stories</p>
+            <h2 class="section-title" id="stories-title">Real problems. Real impact.</h2>
+            <p class="lede">A selection of the kinds of systems I've designed and shipped.</p>
+          </div>
+        </div>
+
+        <div class="stories">
+          <!-- 01 -->
+          <article class="story reveal">
+            <div class="story__visual">
+              <p class="story__caption">
+                <span class="story__num">01</span>
+                <span class="story__title">When the network disappears</span>
+              </p>
+            </div>
+            <div class="story__body">
+              <p class="story__kind">Offline field systems</p>
+              <ul class="tags">
+                <li class="tag tag--accent">OFFLINE-FIRST</li>
+                <li class="tag">SYNC</li>
+                <li class="tag">CONFLICT RESOLUTION</li>
+              </ul>
+              <p class="story__note">Field workflows that keep running with no connectivity, then reconcile cleanly.</p>
+            </div>
+          </article>
+
+          <!-- 02 -->
+          <article class="story story--depth reveal">
+            <div class="story__visual">
+              <span class="viz-depth" aria-hidden="true"><i></i><i></i></span>
+              <p class="story__caption">
+                <span class="story__num">02</span>
+                <span class="story__title">When a phone becomes a measuring instrument</span>
+              </p>
+            </div>
+            <div class="story__body">
+              <p class="story__kind">Spatial measurement</p>
+              <ul class="tags">
+                <li class="tag tag--accent">LIDAR</li>
+                <li class="tag">VISION</li>
+                <li class="tag">MEASUREMENT</li>
+              </ul>
+              <p class="story__note">Turning camera and depth data into measurements you can act on.</p>
+            </div>
+          </article>
+
+          <!-- 03 -->
+          <article class="story story--legacy reveal">
+            <div class="story__visual">
+              <span class="viz-code" aria-hidden="true">final class LegacyModule {
+  func migrate() {
+    // Objective-C → Swift
+    // UIKit → SwiftUI
+  }
+}</span>
+              <p class="story__caption">
+                <span class="story__num">03</span>
+                <span class="story__title">When the codebase is older than the team</span>
+              </p>
+            </div>
+            <div class="story__body">
+              <p class="story__kind">Enterprise modernisation</p>
+              <ul class="tags">
+                <li class="tag tag--accent">LEGACY</li>
+                <li class="tag">MIGRATION</li>
+                <li class="tag">SCALE</li>
+              </ul>
+              <p class="story__note">Evolving a long-lived enterprise codebase incrementally — without a rewrite.</p>
+            </div>
+          </article>
+
+          <!-- 04 -->
+          <article class="story story--agent reveal">
+            <div class="story__visual">
+              <span class="viz-chat" aria-hidden="true">
+                <span>Can you handle this request?</span>
+                <span class="out">Checking availability…</span>
+                <span>Validated against policy.</span>
+                <span class="out">Request submitted ✓</span>
+              </span>
+              <p class="story__caption">
+                <span class="story__num">04</span>
+                <span class="story__title">When AI has to actually do something</span>
+              </p>
+            </div>
+            <div class="story__body">
+              <p class="story__kind">Agentic workflows</p>
+              <ul class="tags">
+                <li class="tag tag--accent">AI AGENT</li>
+                <li class="tag">LLM</li>
+                <li class="tag">TOOL CALLING</li>
+              </ul>
+              <p class="story__note">An assistant that completes workflows, not just conversations.</p>
+            </div>
+          </article>
+
+          <!-- 05 -->
+          <article class="story story--signal reveal">
+            <div class="story__visual">
+              <span class="viz-score" aria-hidden="true">
+                <span>
+                  <span class="telemetry__wave" style="width:120px">
+                    <i style="height:40%"></i><i style="height:75%"></i><i style="height:55%"></i>
+                    <i style="height:90%"></i><i style="height:35%"></i><i style="height:65%"></i>
+                    <i style="height:80%"></i><i style="height:50%"></i><i style="height:70%"></i>
+                  </span>
+                  <small>Sensor fusion</small>
+                </span>
+              </span>
+              <p class="story__caption">
+                <span class="story__num">05</span>
+                <span class="story__title">When sensors have to agree</span>
+              </p>
+            </div>
+            <div class="story__body">
+              <p class="story__kind">Connected devices</p>
+              <ul class="tags">
+                <li class="tag tag--accent">BLE</li>
+                <li class="tag">SENSORS</li>
+                <li class="tag">REAL-TIME</li>
+              </ul>
+              <p class="story__note">Turning noisy real-time signals into behaviour you can trust.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= SYSTEMS ================= -->
+    <section class="section section--band" id="systems" aria-labelledby="systems-title">
+      <div class="wrap">
+        <div class="reveal" style="margin-bottom: var(--s-7);">
+          <p class="eyebrow">Systems</p>
+          <h2 class="section-title" id="systems-title">Different problems.<br>Same philosophy.</h2>
+        </div>
+
+        <div class="principles">
+          <article class="principle reveal">
+            <p class="principle__num">01</p>
+            <h3 class="principle__title">Offline by default</h3>
+            <p class="principle__copy">Software should continue working when connectivity doesn't.</p>
+            <p class="flowline" aria-hidden="true">
+              <b class="wide"></b><span>→</span><b class="narrow"></b><span>→</span><b class="wide"></b>
+            </p>
+          </article>
+
+          <article class="principle reveal">
+            <p class="principle__num">02</p>
+            <h3 class="principle__title">Measure the real world</h3>
+            <p class="principle__copy">Sensors, cameras and spatial computing should produce useful information.</p>
+          </article>
+
+          <article class="principle reveal">
+            <p class="principle__num">03</p>
+            <h3 class="principle__title">Modernize without breaking trust</h3>
+            <p class="principle__copy">Architecture should evolve without abandoning users.</p>
+            <p class="flowline" aria-hidden="true">
+              <span class="chip">OLD</span><span>→</span><span class="chip chip--new">NEW</span>
+            </p>
+          </article>
+
+          <article class="principle reveal">
+            <p class="principle__num">04</p>
+            <h3 class="principle__title">AI should act, not just talk</h3>
+            <p class="principle__copy">Intelligence becomes valuable when it participates in real workflows.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= ABOUT ================= -->
+    <section class="section" id="about" aria-labelledby="about-title">
+      <div class="wrap about-grid">
+
+        <div class="reveal">
+          <p class="eyebrow">Behind the systems</p>
+          <div class="about__head">
+            <img class="about__avatar" src="assets/img/portrait.jpg"
+                 alt="" width="64" height="64" loading="lazy" decoding="async">
+            <div>
+              <h2 class="about__name" id="about-title">I'm Nikunj Prajapati.</h2>
+              <p class="about__role">Lead iOS Software Engineer &amp; iOS Architect.</p>
+            </div>
+          </div>
+          <p class="about__copy">
+            I build Apple-platform systems where mobile, data, sensors and intelligence
+            meet the real world — usually where the problem turns out to be harder than
+            the technology first suggests.
+          </p>
+
+          <p class="social">
+            <a href="https://www.linkedin.com/in/nikunjprajapati" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn profile">
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+            </a>
+            <a href="https://github.com/prajapati-nikunj" target="_blank" rel="noopener noreferrer" aria-label="GitHub profile">
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            </a>
+            <a class="js-mail" href="#contact" aria-label="Email">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+          </p>
+        </div>
+
+        <div class="reveal">
+          <p class="eyebrow">Career evolution</p>
+          <ol class="timeline">
+            <li>
+              <span class="timeline__dot" aria-hidden="true"></span>
+              <span>
+                <span class="timeline__year">2012</span>
+                <span class="timeline__stage">Consumer Mobile</span>
+                <span class="timeline__note">My journey began with consumer apps.</span>
+              </span>
+            </li>
+            <li>
+              <span class="timeline__dot" aria-hidden="true"></span>
+              <span>
+                <span class="timeline__year">2014</span>
+                <span class="timeline__stage">Enterprise Mobile</span>
+                <span class="timeline__note">Building solutions for large organizations.</span>
+              </span>
+            </li>
+            <li>
+              <span class="timeline__dot" aria-hidden="true"></span>
+              <span>
+                <span class="timeline__year">2016</span>
+                <span class="timeline__stage">Field Systems</span>
+                <span class="timeline__note">Offline-first, rugged, real-world environments.</span>
+              </span>
+            </li>
+            <li>
+              <span class="timeline__dot" aria-hidden="true"></span>
+              <span>
+                <span class="timeline__year">2019</span>
+                <span class="timeline__stage">Spatial Computing</span>
+                <span class="timeline__note">ARKit, LiDAR and the 3D world on mobile.</span>
+              </span>
+            </li>
+            <li>
+              <span class="timeline__dot" aria-hidden="true"></span>
+              <span>
+                <span class="timeline__year">2021</span>
+                <span class="timeline__stage">On-Device ML</span>
+                <span class="timeline__note">Bringing intelligence to the edge.</span>
+              </span>
+            </li>
+            <li>
+              <span class="timeline__dot" aria-hidden="true"></span>
+              <span>
+                <span class="timeline__year">2023+</span>
+                <span class="timeline__stage">Agentic AI</span>
+                <span class="timeline__note">Systems that understand and take action.</span>
+              </span>
+            </li>
+          </ol>
+        </div>
+
+        <div class="reveal">
+          <p class="eyebrow">Technology &amp; tools</p>
+          <div class="caps">
+            <div>
+              <p class="cap__label">Apple Platform</p>
+              <ul class="cap__items">
+                <li>Swift</li><li>SwiftUI</li><li>SwiftData</li><li>UIKit</li><li>Concurrency</li>
+              </ul>
+            </div>
+            <div>
+              <p class="cap__label">Spatial &amp; Sensors</p>
+              <ul class="cap__items">
+                <li>ARKit</li><li>LiDAR</li><li>Vision</li><li>CoreMotion</li><li>CoreBluetooth</li>
+              </ul>
+            </div>
+            <div>
+              <p class="cap__label">Intelligence</p>
+              <ul class="cap__items">
+                <li>Core ML</li><li>LLMs</li><li>AI Agents</li><li>RAG</li><li>MCP</li>
+              </ul>
+            </div>
+            <div>
+              <p class="cap__label">Architecture &amp; Systems</p>
+              <ul class="cap__items">
+                <li>Clean Architecture</li><li>Offline-First</li><li>Sync Engines</li><li>CI/CD</li><li>Testing</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ================= CONTACT ================= -->
+    <section class="contact" id="contact" aria-labelledby="contact-title">
+      <div class="wrap">
+        <h2 class="contact__title" id="contact-title">
+          What's the difficult thing<br>you're trying to make work?
+        </h2>
+        <p class="contact__copy">
+          If the problem involves mobile, complex data, unreliable networks, sensors,
+          spatial computing or AI that needs to work in the real world — I'd probably
+          enjoy working on it.
+        </p>
+
+        <a class="btn js-mail" href="https://www.linkedin.com/in/nikunjprajapati"
+           target="_blank" rel="noopener noreferrer">
+          LET'S TALK
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M17 8l4 4m0 0l-4 4m4-4H3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+
+        <p class="contact__links">
+          <a class="js-mail" href="https://www.linkedin.com/in/nikunjprajapati"
+             target="_blank" rel="noopener noreferrer">Email</a>
+          <span aria-hidden="true">·</span>
+          <a href="https://www.linkedin.com/in/nikunjprajapati" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+          <span aria-hidden="true">·</span>
+          <a href="https://github.com/prajapati-nikunj" target="_blank" rel="noopener noreferrer">GitHub</a>
+          <span aria-hidden="true">·</span>
+          <span>India</span>
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>Selected work is intentionally described at a high level to respect client confidentiality and proprietary systems.</p>
+    <p>© <span class="js-year">2026</span> Nikunj Prajapati</p>
+  </footer>
+
+  <script src="js/site.js" defer></script>
+</body>
+</html>
