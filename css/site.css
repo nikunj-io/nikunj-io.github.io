@@ -1300,10 +1300,22 @@ body::before {
 .pager__link:hover .pager__t { color: var(--accent); }
 .pager__link--next { text-align: right; }
 
+/* Closing block on each story page. It had the same hard rule the bands did,
+   so a page ended on a ruled line rather than resolving. Fading seam plus a
+   low bloom, the same device the site footer uses. */
 .sp__cta {
+  position: relative;
   padding-block: var(--s-7);
-  border-top: 1px solid var(--hairline);
+  border-top: 0;
   display: grid; gap: var(--s-4); justify-items: start;
+  background: radial-gradient(ellipse 70% 130% at 22% 0%,
+                              rgba(0, 229, 160, .04), transparent 68%);
+}
+.sp__cta::before {
+  content: ''; position: absolute; inset: 0 0 auto 0; height: 1px;
+  background: linear-gradient(90deg,
+    var(--hairline) 0%, var(--accent-line) 34%, var(--hairline) 70%, transparent);
+  pointer-events: none;
 }
 .sp__ctaTitle { font-size: 1.25rem; font-weight: 600; color: var(--text); }
 .sp__cta .btn { margin-top: 0; }
@@ -1477,8 +1489,42 @@ body > .site-header { z-index: 50; }
    The previous layout stacked both diagrams in one sticky column, so the
    right side ran on for hundreds of pixels after the text had finished.
    ========================================================================= */
-.band { padding-block: var(--s-7); border-top: 1px solid var(--hairline); }
-.band--alt { background: var(--bg-2); }
+/* Same ground treatment as .section--band on the home page. These pages use
+   a different class, which is why the first pass missed them entirely: .band
+   painted nothing and .band--alt a flat --bg-2, so the detail pages kept the
+   stacked-rectangles look the home page had shed.
+
+   Alphas are the same contrast-budgeted 4.3% / 2.5%, and they are safe here
+   by construction: the budget was computed against --bg-2, and .band sits on
+   the darker --bg, so it has more headroom, not less. */
+.band {
+  position: relative;
+  padding-block: var(--s-7);
+  border-top: 0;
+  --gx: 20%;
+  background:
+    radial-gradient(ellipse 76% 60% at var(--gx) 0%,
+                    rgba(0, 229, 160, .043), transparent 60%),
+    radial-gradient(ellipse 64% 56% at calc(100% - var(--gx)) 100%,
+                    rgba(34, 211, 238, .025), transparent 64%);
+}
+.band--alt {
+  --gx: 78%;
+  background:
+    radial-gradient(ellipse 76% 60% at var(--gx) 0%,
+                    rgba(0, 229, 160, .043), transparent 60%),
+    radial-gradient(ellipse 64% 56% at calc(100% - var(--gx)) 100%,
+                    rgba(34, 211, 238, .025), transparent 64%),
+    var(--bg-2);
+}
+
+/* One fading seam per band, matching the home page, instead of a hard rule. */
+.band::before {
+  content: ''; position: absolute; inset: 0 0 auto 0; height: 1px;
+  background: linear-gradient(90deg,
+    transparent, var(--hairline) 18%, var(--hairline-2) 50%, var(--hairline) 82%, transparent);
+  pointer-events: none;
+}
 
 .band__grid { display: grid; gap: var(--s-6); align-items: center; }
 /* These are <h2> so each band is a real section with a name, rather than an
@@ -1667,8 +1713,37 @@ body > .site-header { z-index: 50; }
   color: var(--text-faint);
 }
 
-.eraBlock { padding-block: var(--s-7); border-top: 1px solid var(--hairline); }
-.eraBlock:nth-of-type(even) { background: var(--bg-2); }
+/* Third class carrying the same job as .section--band and .band, on the
+   evolution page. All three needed the treatment separately; only the class
+   names differ. The anchor flips per block via nth-of-type, so four eras in
+   a column lean alternately instead of reading as four identical slabs.
+   Same contrast-budgeted alphas as everywhere else. */
+.eraBlock {
+  position: relative;
+  padding-block: var(--s-7);
+  border-top: 0;
+  --gx: 20%;
+  background:
+    radial-gradient(ellipse 76% 60% at var(--gx) 0%,
+                    rgba(0, 229, 160, .043), transparent 60%),
+    radial-gradient(ellipse 64% 56% at calc(100% - var(--gx)) 100%,
+                    rgba(34, 211, 238, .025), transparent 64%);
+}
+.eraBlock:nth-of-type(even) {
+  --gx: 78%;
+  background:
+    radial-gradient(ellipse 76% 60% at var(--gx) 0%,
+                    rgba(0, 229, 160, .043), transparent 60%),
+    radial-gradient(ellipse 64% 56% at calc(100% - var(--gx)) 100%,
+                    rgba(34, 211, 238, .025), transparent 64%),
+    var(--bg-2);
+}
+.eraBlock::before {
+  content: ''; position: absolute; inset: 0 0 auto 0; height: 1px;
+  background: linear-gradient(90deg,
+    transparent, var(--hairline) 18%, var(--hairline-2) 50%, var(--hairline) 82%, transparent);
+  pointer-events: none;
+}
 .eraBlock__grid { display: grid; gap: var(--s-6); align-items: start; }
 
 .eraBlock__n {
