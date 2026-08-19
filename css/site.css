@@ -1446,11 +1446,47 @@ body > .site-header { z-index: 50; }
    chapters moved onto their own pages. Renamed so a dead-code sweep cannot
    mistake them for orphans again.
    ========================================================================= */
+/* Diagram panels take the same pointer treatment as the story cards on the
+   home page. This is where motion belongs on a detail page: the bands are
+   half prose and half figure, and anything moving behind the prose lightens
+   the ground under the glyphs - measured, and it costs AA. The figure column
+   carries no text over it, so it can move for free.
+
+   --tx / --ty are written by the tilt module as -0.5..0.5 and default to 0,
+   so the panel composes correctly before any pointer and on touch, where the
+   module never runs. Transform and shadow only; no colour changes. */
 .figpanel {
   border: 1px solid var(--hairline);
   border-radius: var(--r-lg);
   background: var(--surface-1);
   padding: var(--s-5);
+  --tx: 0; --ty: 0;
+  transform: perspective(1100px);
+  transition: transform var(--dur) var(--ease),
+              border-color var(--dur) var(--ease),
+              box-shadow var(--dur) var(--ease);
+}
+.figpanel:hover, .figpanel:focus-within {
+  border-color: var(--accent-line);
+  box-shadow: 0 24px 50px -22px rgba(0, 0, 0, .8);
+}
+.figpanel.is-tilting {
+  transform: perspective(1100px)
+             translateY(-4px)
+             rotateX(calc(var(--ty) * -4deg))
+             rotateY(calc(var(--tx) * 5.5deg));
+  transition-duration: 140ms;
+  will-change: transform;
+}
+
+/* The diagram inside counter-moves very slightly against its frame, which is
+   what makes the panel read as a box with depth rather than a tilting sheet.
+   Smaller factor than the panel's own lean, and the opposite sign. */
+.figpanel > *:not(.figpanel__cap) {
+  transition: transform 220ms var(--ease);
+}
+.figpanel.is-tilting > *:not(.figpanel__cap) {
+  transform: translate3d(calc(var(--tx) * -7px), calc(var(--ty) * -5px), 0);
 }
 .figpanel__cap {
   display: flex; justify-content: space-between; gap: var(--s-3);
@@ -2084,7 +2120,9 @@ body > .site-header { z-index: 50; }
 
   .hero__deco, .hero__figure, .lidar { transform: none !important; }
 
-  .story, .story:hover, .story:focus-within, .story.is-tilting {
+  .story, .story:hover, .story:focus-within, .story.is-tilting,
+  .figpanel, .figpanel.is-tilting,
+  .figpanel.is-tilting > * {
     transform: none !important;
   }
 

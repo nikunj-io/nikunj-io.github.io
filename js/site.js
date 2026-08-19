@@ -1044,11 +1044,17 @@
   /* ----------------------------------------------------------------------
      11. Card tilt.
 
-     A small parallax on the story cards: the card leans a few
-     degrees away from the cursor, which reads as the card having thickness.
-     The rotation is written as two custom properties and composed in CSS
-     alongside the hover lift, so there is exactly one transform on the
-     element and the two effects cannot fight each other.
+     A small parallax on the story cards and on the diagram panels of the
+     detail pages: the card leans a few degrees away from the cursor, which
+     reads as the card having thickness. The rotation is written as two custom
+     properties and composed in CSS alongside the hover lift, so there is
+     exactly one transform on the element and the two effects cannot fight.
+
+     The diagram panels are the reason this reaches the detail pages at all.
+     Their bands are half prose, half figure, and motion cannot go behind the
+     prose without eating into text contrast - the ambient field was measured
+     doing exactly that. The figure column has no text over it, so it can carry
+     movement for free. Transform only: nothing here touches a colour.
 
      Pointer-only and motion-sensitive. On touch, `:hover` still gives the
      lift, so nothing is lost - a tilt keyed to a cursor that does not exist
@@ -1057,7 +1063,7 @@
   function wireTilt() {
     if (reduceMotion || !finePointer) return;
 
-    var cards = document.querySelectorAll('.story');
+    var cards = document.querySelectorAll('.story, .figpanel');
     if (!cards.length) return;
 
     Array.prototype.forEach.call(cards, function (card) {
