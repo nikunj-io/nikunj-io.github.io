@@ -193,7 +193,37 @@ a:hover { color: var(--accent); }
 
 .brand:hover { color: inherit; }
 .brand__name { font-size: .9375rem; font-weight: 700; letter-spacing: .07em; color: #fff; }
+/* Rotating job title. All six labels occupy the SAME grid cell, so the header
+   reserves the width of the longest one once and never reflows as they swap -
+   a fading label that also nudges the layout every few seconds is worse than
+   no rotation at all.
+
+   The no-JS path shows the first label: :first-child is visible until the .js
+   class exists, at which point control passes to .is-active and the script
+   drives it. The stack is aria-hidden and an .sr-only title sits beside it,
+   because this is inside a link and a link whose accessible name changes every
+   few seconds is a genuine problem, not a cosmetic one. */
 .brand__role { font-size: .75rem; color: var(--accent); }
+.brand__roles { display: grid; }
+.brand__roles i {
+  grid-area: 1 / 1;
+  font-style: normal;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 460ms var(--ease), transform 460ms var(--ease);
+}
+.brand__roles i:first-child { opacity: 1; transform: none; }
+.js .brand__roles i:first-child { opacity: 0; transform: translateY(4px); }
+.js .brand__roles i.is-active { opacity: 1; transform: none; }
+
+/* Standing still, the first label is simply the title. The script does not
+   rotate under reduced motion, so no .is-active is ever set - without this
+   override the .js rule above would leave the stack with nothing visible. */
+@media (prefers-reduced-motion: reduce) {
+  .brand__roles i { transition: none; }
+  .js .brand__roles i:first-child { opacity: 1; transform: none; }
+}
 
 .nav { display: flex; align-items: center; gap: var(--s-6); }
 .nav__link {

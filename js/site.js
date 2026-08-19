@@ -1177,6 +1177,50 @@
     field.select(isFinite(n) ? n : 0);
   }
 
+  /* ----------------------------------------------------------------------
+     13. Rotating job title.
+
+     The header carries several honest descriptions of the same role, cycled
+     slowly under the name. Slow is the whole point: this sits in fixed
+     chrome, visible on every page for the entire visit, so anything quick
+     enough to catch the eye twice would be an irritant rather than a detail.
+
+     The labels are in the markup, not in here, so the page still shows one
+     with scripting off and the list is edited where it is read. All six share
+     one grid cell, so the header never reflows as they swap.
+
+     Pauses while the tab is hidden, and does not run at all under reduced
+     motion - CSS then leaves the first label standing.
+     ---------------------------------------------------------------------- */
+  function wireRoles() {
+    var stack = document.querySelector('.brand__roles');
+    if (!stack) return;
+
+    var items = stack.querySelectorAll('i');
+    if (items.length < 2) return;
+
+    var i = 0;
+    items[0].classList.add('is-active');
+    if (reduceMotion) return;            // CSS holds the first label visible
+
+    var timer = null;
+    var HOLD = 3200;                     // long enough to read, then read again
+
+    function step() {
+      items[i].classList.remove('is-active');
+      i = (i + 1) % items.length;
+      items[i].classList.add('is-active');
+    }
+
+    function start() { if (!timer) timer = setInterval(step, HOLD); }
+    function stop()  { if (timer) { clearInterval(timer); timer = null; } }
+
+    document.addEventListener('visibilitychange', function () {
+      document.hidden ? stop() : start();
+    });
+    start();
+  }
+
   function init() {
     wireMail();
     wireNav();
@@ -1185,6 +1229,7 @@
     wireRail();
     wireCloud();
     wireYear();
+    wireRoles();
     wireNarrative();
     wireStoryScene();
     wireAmbient();

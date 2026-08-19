@@ -39,7 +39,7 @@
   <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="assets/img/portrait.jpg">
   <link rel="preload" as="image" href="assets/img/portrait-cutout.webp" fetchpriority="high">
-  <link rel="stylesheet" href="css/site.css?v=37">
+  <link rel="stylesheet" href="css/site.css?v=38">
 
   <script type="application/ld+json">
   {
@@ -73,7 +73,13 @@
              width="320" height="319" decoding="async">
         <span class="brand__text">
           <span class="brand__name">NIKUNJ PRAJAPATI</span>
-          <span class="brand__role">iOS Architect &amp; Engineer</span>
+          <span class="brand__role">
+              <!-- The link's accessible name must not change as the label
+                   rotates, so the rotating stack is aria-hidden and a fixed
+                   title carries the name for assistive tech. -->
+              <span class="sr-only">Lead iOS Engineer</span>
+              <span class="brand__roles" aria-hidden="true"><i>Lead iOS Engineer</i><i>Principal iOS Engineer</i><i>Mobile Architect (iOS)</i><i>Staff iOS Engineer</i><i>Full Stack Engineer</i><i>Mobile Architecture Lead</i></span>
+            </span>
         </span>
       </a>
 
@@ -833,6 +839,6 @@
     <p>© <span class="js-year">2026</span> Nikunj Prajapati</p>
   </footer>
 
-  <script src="js/site.js?v=37" defer></script>
+  <script src="js/site.js?v=38" defer></script>
 </body>
 </html>
