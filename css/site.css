@@ -1253,12 +1253,36 @@ body::before {
 .story-page { background: var(--bg); }
 
 .sp__head {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   padding-block: calc(var(--nav-h) + var(--s-6)) var(--s-7);
   border-bottom: 1px solid var(--hairline);
   background:
     radial-gradient(ellipse 60% 70% at 78% 20%, rgba(0, 229, 160, .08), transparent 62%),
     linear-gradient(180deg, var(--bg-2), var(--bg));
 }
+
+/* The live scene sits behind the title. Detail pages had no moving canvas at
+   all - only the near-invisible ambient field - which is why they read as
+   static next to the home page. Masked toward the left so it never competes
+   with the headline for contrast, the same way the home hero's field ramps in
+   past its own copy.
+
+   z-index below the header content, pointer-events off, aria-hidden in the
+   markup: decorative, and the page is complete without it. */
+.sp__field {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  opacity: .85;
+  -webkit-mask-image: linear-gradient(90deg, transparent 8%, #000 46%, #000 100%);
+          mask-image: linear-gradient(90deg, transparent 8%, #000 46%, #000 100%);
+}
+.sp__head > .wrap { position: relative; z-index: 1; }
+
+@media (prefers-reduced-motion: reduce) { .sp__field { display: none; } }
 .sp__back {
   display: inline-flex; align-items: center; gap: var(--s-2);
   font-family: var(--font-mono); font-size: .5625rem; letter-spacing: .16em;

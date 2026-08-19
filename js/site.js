@@ -441,6 +441,262 @@
 
      Kept deliberately slow and low-contrast. Inert under reduced motion.
      ---------------------------------------------------------------------- */
+  /* ----------------------------------------------------------------------
+     8b. Scene field - the shared canvas engine.
+
+     Six renderers - link state, data transfer, spatial capture, agent
+     pipeline, sensor fusion, modernisation - over a slow mote field, with a
+     crossfade between them and a pointer parallax taken relative to the
+     canvas rather than the viewport.
+
+     These were written for the home page and lived inside wireNarrative as
+     closures, so every visitor downloaded all six renderers and only the home
+     page ever ran one. Lifted out unchanged so the story and evolution pages
+     can each show the scene that matches what they are about, for no extra
+     bytes over what was already being shipped.
+
+     Returns a controller: select(i) crossfades to a scene. The home page
+     drives it from scroll position; the detail pages pin a single scene.
+     ---------------------------------------------------------------------- */
+  function makeSceneField(canvas) {
+    if (!canvas || reduceMotion) return null;
+
+
+  var ctx = canvas.getContext('2d', { alpha: true });
+  if (!ctx) return;
+
+  var dpr = Math.min(window.devicePixelRatio || 1, 2);
+  var w = 0, h = 0, raf = null, running = false;
+    var shown = 0, target = 0, fade = 1;   // scene crossfade
+  // Scene-local pointer, normalised against this canvas rather than the
+  // viewport, because these scenes parallax relative to their own frame.
+  // Deliberately not the shared `ptr`: same idea, different basis.
+  var scenePtr = { x: .5, y: .5, tx: .5, ty: .5 };
+  var A = '0, 229, 160';
+
+  function resize() {
+    var r = canvas.getBoundingClientRect();
+    w = r.width; h = r.height;
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  function line(x1, y1, x2, y2, a, width) {
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
+    ctx.strokeStyle = 'rgba(' + A + ',' + a.toFixed(3) + ')';
+    ctx.lineWidth = width || 1; ctx.stroke();
+  }
+  function dot(x, y, r, a) {
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(' + A + ',' + a.toFixed(3) + ')'; ctx.fill();
+  }
+  function ring(x, y, r, a) {
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(' + A + ',' + a.toFixed(3) + ')';
+    ctx.lineWidth = 1; ctx.stroke();
+  }
+
+  /* Ambient field: a few slow points behind every scene. Systems, devices,
+     people. Low enough that it reads as texture, not content. */
+  var motes = [];
+  function seedMotes() {
+    motes = [];
+    for (var i = 0; i < 26; i++) {
+      motes.push({ x: Math.random(), y: Math.random(),
+                   vx: (Math.random() - .5) * .00006,
+                   vy: (Math.random() - .5) * .00006,
+                   r: .6 + Math.random() * .9 });
+    }
+  }
+  function drawMotes(t) {
+    for (var i = 0; i < motes.length; i++) {
+      var m = motes[i];
+      m.x += m.vx * 16; m.y += m.vy * 16;
+      if (m.x < 0) m.x = 1; if (m.x > 1) m.x = 0;
+      if (m.y < 0) m.y = 1; if (m.y > 1) m.y = 0;
+      dot(m.x * w, m.y * h, m.r, .07 + .04 * Math.sin(t * .0008 + i));
+    }
+  }
+
+  // --- 01 link state: a chain of nodes, one hop drops, the local end lives
+  function sceneLink(t, a) {
+    var n = 4, pad = w * .16, span = (w - pad * 2) / (n - 1), y = h * .5;
+    var broken = (Math.floor(t / 2600) % 2) === 1;
+    for (var i = 0; i < n - 1; i++) {
+      var x1 = pad + i * span, x2 = pad + (i + 1) * span;
+      var dead = broken && i === 1;
+      if (dead) {
+        line(x1, y, x1 + span * .38, y, .12 * a, 1);
+        line(x2 - span * .38, y, x2, y, .12 * a, 1);
+        var cx = (x1 + x2) / 2, s = 4.5;
+        ctx.strokeStyle = 'rgba(240,145,63,' + (.7 * a).toFixed(3) + ')';
+        ctx.lineWidth = 1.3; ctx.beginPath();
+        ctx.moveTo(cx - s, y - s); ctx.lineTo(cx + s, y + s);
+        ctx.moveTo(cx + s, y - s); ctx.lineTo(cx - s, y + s); ctx.stroke();
+      } else {
+        line(x1, y, x2, y, .3 * a, 1);
+      }
+    }
+    for (var j = 0; j < n; j++) {
+      var x = pad + j * span;
+      var localNode = j === 0;
+      var pulse = localNode ? .55 + .35 * Math.sin(t * .0022) : (broken && j > 1 ? .2 : .5);
+      dot(x, y, localNode ? 4.4 : 3.4, pulse * a);
+      if (localNode) ring(x, y, 9 + 3 * Math.sin(t * .0022), .18 * a);
+    }
+    ctx.font = '9px ui-monospace, monospace';
+    ctx.fillStyle = 'rgba(' + A + ',' + (.4 * a).toFixed(3) + ')';
+    ctx.fillText('LOCAL', pad - 12, y + 26);
+  }
+
+  // --- 02 data transfer: packets crossing three lanes
+  function sceneFlow(t, a) {
+    var lx = w * .2, rx = w * .8, lanes = 3;
+    for (var i = 0; i < lanes; i++) {
+      var y = h * .34 + i * (h * .16);
+      line(lx, y, rx, y, .12 * a, 1);
+      for (var k = 0; k < 3; k++) {
+        var p = ((t * .00013) + i * .21 + k * .34) % 1;
+        dot(lx + (rx - lx) * p, y, 2, (.5 + .3 * Math.sin(p * Math.PI)) * a);
+      }
+      dot(lx, y, 3, .45 * a);
+      dot(rx, y, 3, .45 * a);
+    }
+    ctx.font = '9px ui-monospace, monospace';
+    ctx.fillStyle = 'rgba(' + A + ',' + (.4 * a).toFixed(3) + ')';
+    ctx.fillText('LOCAL', lx - 16, h * .34 - 22);
+    ctx.fillText('REMOTE', rx - 20, h * .34 - 22);
+  }
+
+  // --- 03 spatial capture: point cloud around a volume, parallax on pointer
+  function sceneSpace(t, a) {
+    var px = (scenePtr.x - .5) * 22, py = (scenePtr.y - .5) * 14;
+    var cx = w * .5 + px, cy = h * .5 + py, bw = w * .16, bh = h * .17;
+    var front = [[cx-bw,cy-bh],[cx+bw,cy-bh],[cx+bw,cy+bh],[cx-bw,cy+bh]];
+    var off = bw * .5;
+    for (var i = 0; i < 4; i++) {
+      var q = front[i], r2 = front[(i + 1) % 4];
+      line(q[0], q[1], r2[0], r2[1], .34 * a, 1);
+      line(q[0] + off, q[1] - off, r2[0] + off, r2[1] - off, .16 * a, 1);
+      line(q[0], q[1], q[0] + off, q[1] - off, .16 * a, 1);
+    }
+    for (var s = 0; s < 46; s++) {
+      var ang = s * 2.399, rad = 22 + (s % 11) * 9;
+      var sx = cx + Math.cos(ang) * rad * 1.7 + px * .4;
+      var sy = cy + Math.sin(ang) * rad * .85 + py * .4;
+      var depth = .3 + .7 * ((s % 7) / 7);
+      dot(sx, sy, .6 + depth * 1.1, (.1 + depth * .32) * a);
+    }
+  }
+
+  // --- 04 agent pipeline: a pulse travelling through the stages
+  function sceneAgent(t, a) {
+    var steps = ['INTENT', 'UNDERSTAND', 'DECIDE', 'ACT', 'DONE'];
+    var top = h * .2, gap = (h * .6) / (steps.length - 1), x = w * .34;
+    var cursor = (t * .00028) % 1;
+    var at = cursor * (steps.length - 1);
+    for (var i = 0; i < steps.length; i++) {
+      var y = top + i * gap;
+      if (i < steps.length - 1) line(x, y + 6, x, y + gap - 6, .14 * a, 1);
+      var near = Math.max(0, 1 - Math.abs(at - i) * 1.6);
+      dot(x, y, 3 + near * 2.4, (.24 + near * .62) * a);
+      if (near > .35) ring(x, y, 8 + near * 5, near * .3 * a);
+      ctx.font = '9px ui-monospace, monospace';
+      ctx.fillStyle = 'rgba(' + A + ',' + ((.26 + near * .5) * a).toFixed(3) + ')';
+      ctx.fillText(steps[i], x + 16, y + 3);
+    }
+  }
+
+  // --- 05 sensor fusion: three sources diverge, then agree on one decision
+  function sceneFusion(t, a) {
+    var x0 = w * .14, x1 = w * .62, dx = w * .82, mid = h * .5;
+    for (var i = 0; i < 3; i++) {
+      var base = h * .3 + i * (h * .2);
+      ctx.beginPath();
+      for (var x = x0; x <= x1; x += 5) {
+        var p = (x - x0) / (x1 - x0);
+        var noise = Math.sin(x * .07 + t * .0012 + i * 2.1) * (7 * (1 - p));
+        var y = base + (mid - base) * (p * p) + noise;
+        if (x === x0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.strokeStyle = 'rgba(143,161,181,' + (.34 * a).toFixed(3) + ')';
+      ctx.lineWidth = 1; ctx.stroke();
+      dot(x0, base, 2.4, .4 * a);
+    }
+    line(x1, mid, dx, mid, .5 * a, 1.6);
+    dot(x1, mid, 4, .75 * a);
+    ring(x1, mid, 8 + 2.5 * Math.sin(t * .002), .22 * a);
+    ctx.font = '9px ui-monospace, monospace';
+    ctx.fillStyle = 'rgba(' + A + ',' + (.45 * a).toFixed(3) + ')';
+    ctx.fillText('DECISION', dx - 46, mid - 12);
+  }
+
+  // --- 06 modernisation: one slab becomes separated modules
+  function sceneModules(t, a) {
+    var phase = (Math.sin(t * .0006) + 1) / 2;       // 0 monolith, 1 modules
+    var cx = w * .5, cy = h * .5, bw = w * .3, bh = h * .34;
+    var cols = 3, rows = 3;
+    var cw = bw / cols, ch = bh / rows;
+    for (var r = 0; r < rows; r++) {
+      for (var c = 0; c < cols; c++) {
+        var sp = phase * 7;
+        var x = cx - bw / 2 + c * cw + (c - 1) * sp;
+        var y = cy - bh / 2 + r * ch + (r - 1) * sp;
+        var inset = phase * 1.5;
+        ctx.beginPath();
+        ctx.rect(x + inset, y + inset, cw - inset * 2 - 1, ch - inset * 2 - 1);
+        ctx.fillStyle = 'rgba(' + A + ',' + ((.05 + phase * .07) * a).toFixed(3) + ')';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(' + A + ',' + ((.16 + phase * .34) * a).toFixed(3) + ')';
+        ctx.lineWidth = 1; ctx.stroke();
+      }
+    }
+  }
+
+  var SCENES = [sceneLink, sceneFlow, sceneSpace, sceneAgent, sceneFusion, sceneModules];
+
+  function frame(t) {
+    ctx.clearRect(0, 0, w, h);
+    scenePtr.x += (scenePtr.tx - scenePtr.x) * .06;
+    scenePtr.y += (scenePtr.ty - scenePtr.y) * .06;
+
+    drawMotes(t);
+
+      if (shown !== target) { fade -= .05; if (fade <= 0) { shown = target; fade = 0; } }
+    else if (fade < 1) { fade = Math.min(1, fade + .05); }
+
+    SCENES[shown](t, Math.max(0, fade));
+    raf = requestAnimationFrame(frame);
+  }
+
+  function start() { if (!running) { running = true; raf = requestAnimationFrame(frame); } }
+  function stop()  { if (running) { running = false; cancelAnimationFrame(raf); } }
+
+  window.addEventListener('pointermove', function (e) {
+    var r = canvas.getBoundingClientRect();
+    scenePtr.tx = (e.clientX - r.left) / r.width;
+    scenePtr.ty = (e.clientY - r.top) / r.height;
+  }, { passive: true });
+
+  window.addEventListener('resize', function () { resize(); seedMotes(); });
+
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(function (e) {
+      e[0].isIntersecting ? start() : stop();
+    }, { threshold: .01 }).observe(canvas);
+  } else { start(); }
+  document.addEventListener('visibilitychange', function () {
+    document.hidden ? stop() : start();
+  });
+
+  resize(); seedMotes();
+
+    return { select: function (i) { if (i >= 0 && i < SCENES.length) target = i; } };
+  }
+
+  var sceneField = null;
+
   function wireNarrative() {
     var lines = Array.prototype.slice.call(document.querySelectorAll('.nline'));
     if (!lines.length) return;
@@ -462,6 +718,7 @@
         l.setAttribute('aria-current', on ? 'true' : 'false');
       });
       active = i;
+      if (sceneField) sceneField.select(i);
       if (label) label.textContent = LABELS[i];
     }
 
@@ -496,238 +753,8 @@
       lines.forEach(function (l) { io.observe(l); });
     }
 
-    var canvas = document.querySelector('.narrative__viz');
-    if (!canvas || reduceMotion) return;   // interaction above is already wired
-
-    var ctx = canvas.getContext('2d', { alpha: true });
-    if (!ctx) return;
-
-    var dpr = Math.min(window.devicePixelRatio || 1, 2);
-    var w = 0, h = 0, raf = null, running = false;
-    var shown = 0, fade = 1;               // scene crossfade
-    // Scene-local pointer, normalised against this canvas rather than the
-    // viewport, because these scenes parallax relative to their own frame.
-    // Deliberately not the shared `ptr`: same idea, different basis.
-    var scenePtr = { x: .5, y: .5, tx: .5, ty: .5 };
-    var A = '0, 229, 160';
-
-    function resize() {
-      var r = canvas.getBoundingClientRect();
-      w = r.width; h = r.height;
-      canvas.width = Math.round(w * dpr);
-      canvas.height = Math.round(h * dpr);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    }
-
-    function line(x1, y1, x2, y2, a, width) {
-      ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
-      ctx.strokeStyle = 'rgba(' + A + ',' + a.toFixed(3) + ')';
-      ctx.lineWidth = width || 1; ctx.stroke();
-    }
-    function dot(x, y, r, a) {
-      ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(' + A + ',' + a.toFixed(3) + ')'; ctx.fill();
-    }
-    function ring(x, y, r, a) {
-      ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
-      ctx.strokeStyle = 'rgba(' + A + ',' + a.toFixed(3) + ')';
-      ctx.lineWidth = 1; ctx.stroke();
-    }
-
-    /* Ambient field: a few slow points behind every scene. Systems, devices,
-       people. Low enough that it reads as texture, not content. */
-    var motes = [];
-    function seedMotes() {
-      motes = [];
-      for (var i = 0; i < 26; i++) {
-        motes.push({ x: Math.random(), y: Math.random(),
-                     vx: (Math.random() - .5) * .00006,
-                     vy: (Math.random() - .5) * .00006,
-                     r: .6 + Math.random() * .9 });
-      }
-    }
-    function drawMotes(t) {
-      for (var i = 0; i < motes.length; i++) {
-        var m = motes[i];
-        m.x += m.vx * 16; m.y += m.vy * 16;
-        if (m.x < 0) m.x = 1; if (m.x > 1) m.x = 0;
-        if (m.y < 0) m.y = 1; if (m.y > 1) m.y = 0;
-        dot(m.x * w, m.y * h, m.r, .07 + .04 * Math.sin(t * .0008 + i));
-      }
-    }
-
-    // --- 01 link state: a chain of nodes, one hop drops, the local end lives
-    function sceneLink(t, a) {
-      var n = 4, pad = w * .16, span = (w - pad * 2) / (n - 1), y = h * .5;
-      var broken = (Math.floor(t / 2600) % 2) === 1;
-      for (var i = 0; i < n - 1; i++) {
-        var x1 = pad + i * span, x2 = pad + (i + 1) * span;
-        var dead = broken && i === 1;
-        if (dead) {
-          line(x1, y, x1 + span * .38, y, .12 * a, 1);
-          line(x2 - span * .38, y, x2, y, .12 * a, 1);
-          var cx = (x1 + x2) / 2, s = 4.5;
-          ctx.strokeStyle = 'rgba(240,145,63,' + (.7 * a).toFixed(3) + ')';
-          ctx.lineWidth = 1.3; ctx.beginPath();
-          ctx.moveTo(cx - s, y - s); ctx.lineTo(cx + s, y + s);
-          ctx.moveTo(cx + s, y - s); ctx.lineTo(cx - s, y + s); ctx.stroke();
-        } else {
-          line(x1, y, x2, y, .3 * a, 1);
-        }
-      }
-      for (var j = 0; j < n; j++) {
-        var x = pad + j * span;
-        var localNode = j === 0;
-        var pulse = localNode ? .55 + .35 * Math.sin(t * .0022) : (broken && j > 1 ? .2 : .5);
-        dot(x, y, localNode ? 4.4 : 3.4, pulse * a);
-        if (localNode) ring(x, y, 9 + 3 * Math.sin(t * .0022), .18 * a);
-      }
-      ctx.font = '9px ui-monospace, monospace';
-      ctx.fillStyle = 'rgba(' + A + ',' + (.4 * a).toFixed(3) + ')';
-      ctx.fillText('LOCAL', pad - 12, y + 26);
-    }
-
-    // --- 02 data transfer: packets crossing three lanes
-    function sceneFlow(t, a) {
-      var lx = w * .2, rx = w * .8, lanes = 3;
-      for (var i = 0; i < lanes; i++) {
-        var y = h * .34 + i * (h * .16);
-        line(lx, y, rx, y, .12 * a, 1);
-        for (var k = 0; k < 3; k++) {
-          var p = ((t * .00013) + i * .21 + k * .34) % 1;
-          dot(lx + (rx - lx) * p, y, 2, (.5 + .3 * Math.sin(p * Math.PI)) * a);
-        }
-        dot(lx, y, 3, .45 * a);
-        dot(rx, y, 3, .45 * a);
-      }
-      ctx.font = '9px ui-monospace, monospace';
-      ctx.fillStyle = 'rgba(' + A + ',' + (.4 * a).toFixed(3) + ')';
-      ctx.fillText('LOCAL', lx - 16, h * .34 - 22);
-      ctx.fillText('REMOTE', rx - 20, h * .34 - 22);
-    }
-
-    // --- 03 spatial capture: point cloud around a volume, parallax on pointer
-    function sceneSpace(t, a) {
-      var px = (scenePtr.x - .5) * 22, py = (scenePtr.y - .5) * 14;
-      var cx = w * .5 + px, cy = h * .5 + py, bw = w * .16, bh = h * .17;
-      var front = [[cx-bw,cy-bh],[cx+bw,cy-bh],[cx+bw,cy+bh],[cx-bw,cy+bh]];
-      var off = bw * .5;
-      for (var i = 0; i < 4; i++) {
-        var q = front[i], r2 = front[(i + 1) % 4];
-        line(q[0], q[1], r2[0], r2[1], .34 * a, 1);
-        line(q[0] + off, q[1] - off, r2[0] + off, r2[1] - off, .16 * a, 1);
-        line(q[0], q[1], q[0] + off, q[1] - off, .16 * a, 1);
-      }
-      for (var s = 0; s < 46; s++) {
-        var ang = s * 2.399, rad = 22 + (s % 11) * 9;
-        var sx = cx + Math.cos(ang) * rad * 1.7 + px * .4;
-        var sy = cy + Math.sin(ang) * rad * .85 + py * .4;
-        var depth = .3 + .7 * ((s % 7) / 7);
-        dot(sx, sy, .6 + depth * 1.1, (.1 + depth * .32) * a);
-      }
-    }
-
-    // --- 04 agent pipeline: a pulse travelling through the stages
-    function sceneAgent(t, a) {
-      var steps = ['INTENT', 'UNDERSTAND', 'DECIDE', 'ACT', 'DONE'];
-      var top = h * .2, gap = (h * .6) / (steps.length - 1), x = w * .34;
-      var cursor = (t * .00028) % 1;
-      var at = cursor * (steps.length - 1);
-      for (var i = 0; i < steps.length; i++) {
-        var y = top + i * gap;
-        if (i < steps.length - 1) line(x, y + 6, x, y + gap - 6, .14 * a, 1);
-        var near = Math.max(0, 1 - Math.abs(at - i) * 1.6);
-        dot(x, y, 3 + near * 2.4, (.24 + near * .62) * a);
-        if (near > .35) ring(x, y, 8 + near * 5, near * .3 * a);
-        ctx.font = '9px ui-monospace, monospace';
-        ctx.fillStyle = 'rgba(' + A + ',' + ((.26 + near * .5) * a).toFixed(3) + ')';
-        ctx.fillText(steps[i], x + 16, y + 3);
-      }
-    }
-
-    // --- 05 sensor fusion: three sources diverge, then agree on one decision
-    function sceneFusion(t, a) {
-      var x0 = w * .14, x1 = w * .62, dx = w * .82, mid = h * .5;
-      for (var i = 0; i < 3; i++) {
-        var base = h * .3 + i * (h * .2);
-        ctx.beginPath();
-        for (var x = x0; x <= x1; x += 5) {
-          var p = (x - x0) / (x1 - x0);
-          var noise = Math.sin(x * .07 + t * .0012 + i * 2.1) * (7 * (1 - p));
-          var y = base + (mid - base) * (p * p) + noise;
-          if (x === x0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-        }
-        ctx.strokeStyle = 'rgba(143,161,181,' + (.34 * a).toFixed(3) + ')';
-        ctx.lineWidth = 1; ctx.stroke();
-        dot(x0, base, 2.4, .4 * a);
-      }
-      line(x1, mid, dx, mid, .5 * a, 1.6);
-      dot(x1, mid, 4, .75 * a);
-      ring(x1, mid, 8 + 2.5 * Math.sin(t * .002), .22 * a);
-      ctx.font = '9px ui-monospace, monospace';
-      ctx.fillStyle = 'rgba(' + A + ',' + (.45 * a).toFixed(3) + ')';
-      ctx.fillText('DECISION', dx - 46, mid - 12);
-    }
-
-    // --- 06 modernisation: one slab becomes separated modules
-    function sceneModules(t, a) {
-      var phase = (Math.sin(t * .0006) + 1) / 2;       // 0 monolith, 1 modules
-      var cx = w * .5, cy = h * .5, bw = w * .3, bh = h * .34;
-      var cols = 3, rows = 3;
-      var cw = bw / cols, ch = bh / rows;
-      for (var r = 0; r < rows; r++) {
-        for (var c = 0; c < cols; c++) {
-          var sp = phase * 7;
-          var x = cx - bw / 2 + c * cw + (c - 1) * sp;
-          var y = cy - bh / 2 + r * ch + (r - 1) * sp;
-          var inset = phase * 1.5;
-          ctx.beginPath();
-          ctx.rect(x + inset, y + inset, cw - inset * 2 - 1, ch - inset * 2 - 1);
-          ctx.fillStyle = 'rgba(' + A + ',' + ((.05 + phase * .07) * a).toFixed(3) + ')';
-          ctx.fill();
-          ctx.strokeStyle = 'rgba(' + A + ',' + ((.16 + phase * .34) * a).toFixed(3) + ')';
-          ctx.lineWidth = 1; ctx.stroke();
-        }
-      }
-    }
-
-    var SCENES = [sceneLink, sceneFlow, sceneSpace, sceneAgent, sceneFusion, sceneModules];
-
-    function frame(t) {
-      ctx.clearRect(0, 0, w, h);
-      scenePtr.x += (scenePtr.tx - scenePtr.x) * .06;
-      scenePtr.y += (scenePtr.ty - scenePtr.y) * .06;
-
-      drawMotes(t);
-
-      if (shown !== active) { fade -= .05; if (fade <= 0) { shown = active; fade = 0; } }
-      else if (fade < 1) { fade = Math.min(1, fade + .05); }
-
-      SCENES[shown](t, Math.max(0, fade));
-      raf = requestAnimationFrame(frame);
-    }
-
-    function start() { if (!running) { running = true; raf = requestAnimationFrame(frame); } }
-    function stop()  { if (running) { running = false; cancelAnimationFrame(raf); } }
-
-    window.addEventListener('pointermove', function (e) {
-      var r = canvas.getBoundingClientRect();
-      scenePtr.tx = (e.clientX - r.left) / r.width;
-      scenePtr.ty = (e.clientY - r.top) / r.height;
-    }, { passive: true });
-
-    window.addEventListener('resize', function () { resize(); seedMotes(); });
-
-    if ('IntersectionObserver' in window) {
-      new IntersectionObserver(function (e) {
-        e[0].isIntersecting ? start() : stop();
-      }, { threshold: .01 }).observe(canvas);
-    } else { start(); }
-    document.addEventListener('visibilitychange', function () {
-      document.hidden ? stop() : start();
-    });
-
-    resize(); seedMotes();
+    var field = makeSceneField(document.querySelector('.narrative__viz'));
+    if (field) sceneField = field;
   }
 
 
@@ -1120,6 +1147,30 @@
     nums.forEach(function (el) { io.observe(el); });
   }
 
+  /* ----------------------------------------------------------------------
+     8c. Detail-page scene.
+
+     Each story page and the evolution page carries one canvas in its header
+     running the scene that matches its subject: the offline story shows the
+     link dropping, the measurement story shows the point cloud, the agent
+     story shows the pipeline. The page declares which via data-scene, so the
+     mapping lives in the markup next to the prose it illustrates rather than
+     as a lookup table in here keyed on filename.
+
+     Everything else - the engine, the six renderers - was already being
+     downloaded by these pages. Only the canvas element and this call are new.
+     ---------------------------------------------------------------------- */
+  function wireStoryScene() {
+    var canvas = document.querySelector('.sp__field');
+    if (!canvas) return;
+
+    var field = makeSceneField(canvas);
+    if (!field) return;                    // reduced motion, or no 2D context
+
+    var n = parseInt(canvas.getAttribute('data-scene'), 10);
+    field.select(isFinite(n) ? n : 0);
+  }
+
   function init() {
     wireMail();
     wireNav();
@@ -1129,6 +1180,7 @@
     wireCloud();
     wireYear();
     wireNarrative();
+    wireStoryScene();
     wireAmbient();
     wireLidar();
     wireTilt();
