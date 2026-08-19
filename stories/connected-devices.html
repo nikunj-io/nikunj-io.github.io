@@ -11,7 +11,7 @@
   <meta name="theme-color" content="#050a0f">
   <meta name="color-scheme" content="dark">
   <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self' 'sha256-ZpWgbRrl+DTWFgl8YFfuvN1ZmxDCnrmzUiUAhx2IDSs='; font-src 'self'; connect-src https://firestore.googleapis.com; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; upgrade-insecure-requests">
+        content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self' 'sha256-0QJeoFickOigsiI4QuVuZocw6Liuyen5rFDr5qWa87I='; script-src-attr 'none'; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; upgrade-insecure-requests">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta property="og:type" content="article">
   <meta property="og:title" content="When software has to listen to the physical world.">
@@ -21,7 +21,7 @@
   <meta property="og:image" content="https://nikunj-io.github.io/assets/img/portrait.jpg">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="../css/site.css?v=30">
+  <link rel="stylesheet" href="../css/site.css?v=34">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -104,7 +104,7 @@
       <section class="band">
         <div class="wrap band__grid">
           <div class="band__text reveal">
-            <p class="band__label">The problem</p>
+            <h2 class="band__label">The problem</h2>
             <p>Signals drop. Devices vanish mid-session and come back with a different
               identifier. Readings turn up out of order, duplicated, or stamped with a
               clock that disagrees with the phone. Taken alone, any single one is a poor
@@ -139,7 +139,7 @@
       <!-- Step-by-step walk through that diagram -->
       <section class="band band--alt">
         <div class="wrap">
-          <p class="band__label reveal">How a decision gets made</p>
+          <h2 class="band__label reveal">How a decision gets made</h2>
           <ol class="steps">
             <li class="step">
               <span class="step__n">01</span>
@@ -187,7 +187,7 @@
             <p class="flow__step flow__step--work">DECISION <b>with confidence</b></p>
           </div></figure>
           <div class="band__text reveal">
-            <p class="band__label">The approach</p>
+            <h2 class="band__label">The approach</h2>
             <p>So nothing acts on one reading. Streams get buffered, lined up in time, and
               checked against each other. When independent sources agree, confidence goes
               up. When they don't, that's useful too: it usually means a sensor has
@@ -204,14 +204,14 @@
       <!-- What was actually difficult -->
       <section class="band band--alt">
         <div class="wrap sp__hard reveal">
-          <p class="band__label">The part that took the longest</p>
+          <h2 class="band__label">The part that took the longest</h2>
           <p class="sp__hardText">The connection lifecycle. Reconnecting cleanly, resuming without losing the window, and never letting a dropout look like a wrong answer.</p>
         </div>
       </section>
 
       <section class="band">
         <div class="wrap">
-          <p class="band__label reveal">What the work involved</p>
+          <h2 class="band__label reveal">What the work involved</h2>
           <ul class="facts reveal"><li class="fact"><strong>The constraint</strong><p>Readings arrive late, duplicated, or from a device that just reconnected.</p></li>
           <li class="fact"><strong>The engineering</strong><p>Buffering, time alignment, cross-source agreement and connection lifecycle handling.</p></li>
           <li class="fact"><strong>The ownership</strong><p>The stream pipeline, confidence scoring and reconnect behaviour.</p></li>
@@ -236,11 +236,7 @@
 
   <footer class="site-footer">
     <p>© <span class="js-year">2026</span> Nikunj Prajapati</p>
-    <p class="visits" hidden>
-      <span class="visits__dot" aria-hidden="true"></span>
-      <span class="js-visits">0</span> visits
-    </p>
   </footer>
-  <script src="../js/site.js?v=20" defer></script>
+  <script src="../js/site.js?v=34" defer></script>
 </body>
 </html>

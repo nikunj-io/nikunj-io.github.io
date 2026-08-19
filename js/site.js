@@ -15,6 +15,60 @@
 
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var coarse = window.matchMedia('(max-width: 899px)').matches;
+  var finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+  /* ----------------------------------------------------------------------
+     Shared pointer.
+
+     One listener feeding one smoothed value, read by the hero field, the
+     ambient field, the LiDAR panel and the hero parallax. Four separate
+     listeners meant four handlers on the same event easing at four slightly
+     different rates, which is what made the page feel like several effects
+     rather than one field. Smoothing happens once per animation frame -
+     `easePointer` is idempotent within a frame because every rAF callback in
+     a frame is handed the same timestamp.
+     ---------------------------------------------------------------------- */
+  var ptr = {
+    tx: 0.5, ty: 0.5,        // target, normalised against the viewport
+    x:  0.5, y:  0.5,        // smoothed, what everything actually reads
+    cx: -9999, cy: -9999,    // last client position, for canvas-space maths
+    seen: false              // false until the pointer has actually moved
+  };
+  var ptrFrame = -1;
+
+  function easePointer(t) {
+    if (t === ptrFrame) return;
+    ptrFrame = t;
+    ptr.x += (ptr.tx - ptr.x) * 0.055;
+    ptr.y += (ptr.ty - ptr.y) * 0.055;
+  }
+
+  if (finePointer) {
+    window.addEventListener('pointermove', function (e) {
+      ptr.tx = e.clientX / window.innerWidth;
+      ptr.ty = e.clientY / window.innerHeight;
+      ptr.cx = e.clientX;
+      ptr.cy = e.clientY;
+      ptr.seen = true;
+    }, { passive: true });
+
+    // Leaving the window settles the field back to centre instead of
+    // freezing it mid-lean, which reads as a stall rather than a rest.
+    document.addEventListener('pointerleave', function () {
+      ptr.tx = 0.5; ptr.ty = 0.5;
+      ptr.cx = -9999; ptr.cy = -9999;
+    }, { passive: true });
+  }
+
+  /* Page scroll, tracked passively. Canvases need their own position in
+     viewport space every frame; reading window.scrollY or a bounding rect
+     inside the frame loop forces a layout flush 60 times a second, so the
+     value is cached here and the canvases measure their document offset
+     only on resize. */
+  var pageY = window.scrollY || 0;
+  window.addEventListener('scroll', function () {
+    pageY = window.scrollY || 0;
+  }, { passive: true });
 
   /* ----------------------------------------------------------------------
      1. Email assembly.
@@ -160,7 +214,16 @@
 
      A wave mesh of points sweeping left to right, compressed toward the
      horizon so it reads as depth rather than a flat grid, plus a scatter of
-     loose particles. Everything parallaxes toward the pointer.
+     loose particles. The whole field leans toward the pointer, and points
+     near the cursor part around it and brighten - a local influence on top
+     of the global lean is what makes the surface feel touched rather than
+     merely tilted.
+
+     The same loop drives the hero's layered parallax by writing two custom
+     properties on the section; CSS moves the decorative SVGs, the portrait
+     and the LiDAR panel at different rates off those. Writing custom
+     properties through the CSSOM is not an inline style attribute, so it
+     does not need 'unsafe-inline' in the style-src directive.
 
      Skipped under reduced motion and on small screens, where the CSS
      gradient already carries the look at no cost. The canvas is decorative
@@ -173,16 +236,25 @@
     var ctx = canvas.getContext('2d', { alpha: true });
     if (!ctx) return;
 
+    var hero = document.querySelector('.hero');
     var dpr = Math.min(window.devicePixelRatio || 1, 2);
     var w = 0, h = 0;
+    var docLeft = 0, docTop = 0;         // canvas origin in document space
     var COLS = 0, ROWS = 14;
     var motes = [];
-    var pointer = { x: .5, y: .5, tx: .5, ty: .5 };
     var raf = null, running = false;
+
+    // Radius of the cursor's local influence, and its square so the common
+    // case - a point nowhere near the cursor - costs one multiply-add and a
+    // comparison rather than a square root.
+    var R = 132, R2 = R * R;
 
     function resize() {
       var r = canvas.getBoundingClientRect();
       w = r.width; h = r.height;
+      docLeft = r.left + (window.scrollX || 0);
+      docTop  = r.top  + (window.scrollY || 0);
+
       canvas.width = Math.round(w * dpr);
       canvas.height = Math.round(h * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -215,12 +287,25 @@
     }
 
     function frame(t) {
+      easePointer(t);
       ctx.clearRect(0, 0, w, h);
 
-      pointer.x += (pointer.tx - pointer.x) * .05;
-      pointer.y += (pointer.ty - pointer.y) * .05;
-      var px = (pointer.x - .5) * 30;
-      var py = (pointer.y - .5) * 20;
+      var lean = ptr.seen ? 1 : 0;
+      var px = (ptr.x - .5) * 30 * lean;
+      var py = (ptr.y - .5) * 20 * lean;
+
+      // Cursor in canvas space, from cached scroll rather than a live
+      // bounding-rect read. Off-screen when the pointer has never moved, so
+      // the influence term costs nothing until it is earned.
+      var curX = ptr.cx - docLeft;
+      var curY = ptr.cy + pageY - docTop;
+
+      // Feed the hero's layered parallax. Two writes on one element per
+      // frame; the layers themselves are composited by CSS.
+      if (hero) {
+        hero.style.setProperty('--hx', (ptr.x - .5).toFixed(4));
+        hero.style.setProperty('--hy', (ptr.y - .5).toFixed(4));
+      }
 
       // --- wave mesh -----------------------------------------------------
       for (var r2 = 0; r2 < ROWS; r2++) {
@@ -244,9 +329,24 @@
           var alpha = (.12 + depth * .62) * fade;
           var size  = .55 + depth * 1.7;
 
+          // Local influence: points inside the radius drift outward along
+          // the radial and brighten. Squared falloff, so the boundary of the
+          // effect is invisible and only the centre reads as a response.
+          var dx = x - curX, dy = y - curY;
+          var d2 = dx * dx + dy * dy;
+          if (d2 < R2) {
+            var d = Math.sqrt(d2) || 1;
+            var f = 1 - d / R;
+            var ff = f * f;
+            x += (dx / d) * ff * 15;
+            y += (dy / d) * ff * 15;
+            alpha += ff * .46 * fade;
+            size  += ff * 1.15;
+          }
+
           ctx.beginPath();
           ctx.arc(x, y, size, 0, Math.PI * 2);
-          ctx.fillStyle = 'rgba(0, 229, 160, ' + alpha.toFixed(3) + ')';
+          ctx.fillStyle = 'rgba(0, 229, 160, ' + (alpha > 1 ? 1 : alpha).toFixed(3) + ')';
           ctx.fill();
 
           // Thread each row together; the line is what makes it read as a
@@ -273,12 +373,27 @@
         var mf = edgeFade(m.x / w);
         if (mf <= .01) continue;
 
-        var tw = .65 + .35 * Math.sin(t * .0013 + i);
+        var mx = m.x + px * .5, my = m.y + py * .5;
+        var mAlpha = m.a * mf * (.65 + .35 * Math.sin(t * .0013 + i));
+        var mr = m.r;
+
+        var mdx = mx - curX, mdy = my - curY;
+        var md2 = mdx * mdx + mdy * mdy;
+        if (md2 < R2) {
+          var md = Math.sqrt(md2) || 1;
+          var mfc = 1 - md / R;
+          var mff = mfc * mfc;
+          mx += (mdx / md) * mff * 22;   // motes are looser, so they give more
+          my += (mdy / md) * mff * 22;
+          mAlpha += mff * .5 * mf;
+          mr += mff * .9;
+        }
+
         ctx.beginPath();
-        ctx.arc(m.x + px * .5, m.y + py * .5, m.r, 0, Math.PI * 2);
+        ctx.arc(mx, my, mr, 0, Math.PI * 2);
         ctx.fillStyle = m.warm
-          ? 'rgba(240, 190, 120, ' + (m.a * mf * tw * .8).toFixed(3) + ')'
-          : 'rgba(90, 245, 205, ' + (m.a * mf * tw).toFixed(3) + ')';
+          ? 'rgba(240, 190, 120, ' + (mAlpha > 1 ? 1 : mAlpha * .8).toFixed(3) + ')'
+          : 'rgba(90, 245, 205, ' + (mAlpha > 1 ? 1 : mAlpha).toFixed(3) + ')';
         ctx.fill();
       }
 
@@ -287,11 +402,6 @@
 
     function start() { if (!running) { running = true; raf = requestAnimationFrame(frame); } }
     function stop()  { if (running) { running = false; cancelAnimationFrame(raf); } }
-
-    window.addEventListener('pointermove', function (e) {
-      pointer.tx = e.clientX / window.innerWidth;
-      pointer.ty = e.clientY / window.innerHeight;
-    }, { passive: true });
 
     window.addEventListener('resize', resize);
 
@@ -395,7 +505,10 @@
     var dpr = Math.min(window.devicePixelRatio || 1, 2);
     var w = 0, h = 0, raf = null, running = false;
     var shown = 0, fade = 1;               // scene crossfade
-    var ptr = { x: .5, y: .5, tx: .5, ty: .5 };
+    // Scene-local pointer, normalised against this canvas rather than the
+    // viewport, because these scenes parallax relative to their own frame.
+    // Deliberately not the shared `ptr`: same idea, different basis.
+    var scenePtr = { x: .5, y: .5, tx: .5, ty: .5 };
     var A = '0, 229, 160';
 
     function resize() {
@@ -495,7 +608,7 @@
 
     // --- 03 spatial capture: point cloud around a volume, parallax on pointer
     function sceneSpace(t, a) {
-      var px = (ptr.x - .5) * 22, py = (ptr.y - .5) * 14;
+      var px = (scenePtr.x - .5) * 22, py = (scenePtr.y - .5) * 14;
       var cx = w * .5 + px, cy = h * .5 + py, bw = w * .16, bh = h * .17;
       var front = [[cx-bw,cy-bh],[cx+bw,cy-bh],[cx+bw,cy+bh],[cx-bw,cy+bh]];
       var off = bw * .5;
@@ -582,8 +695,8 @@
 
     function frame(t) {
       ctx.clearRect(0, 0, w, h);
-      ptr.x += (ptr.tx - ptr.x) * .06;
-      ptr.y += (ptr.ty - ptr.y) * .06;
+      scenePtr.x += (scenePtr.tx - scenePtr.x) * .06;
+      scenePtr.y += (scenePtr.ty - scenePtr.y) * .06;
 
       drawMotes(t);
 
@@ -599,8 +712,8 @@
 
     window.addEventListener('pointermove', function (e) {
       var r = canvas.getBoundingClientRect();
-      ptr.tx = (e.clientX - r.left) / r.width;
-      ptr.ty = (e.clientY - r.top) / r.height;
+      scenePtr.tx = (e.clientX - r.left) / r.width;
+      scenePtr.ty = (e.clientY - r.top) / r.height;
     }, { passive: true });
 
     window.addEventListener('resize', function () { resize(); seedMotes(); });
@@ -623,7 +736,17 @@
 
      Runs on every page. Slow drifting points with the occasional faint link
      between near neighbours, at a contrast low enough to read as paper grain
-     rather than as content. Pauses when the tab is hidden.
+     rather than as content.
+
+     The pointer draws points very gently toward it and lifts their opacity,
+     so the whole page has the same quiet responsiveness as the hero rather
+     than the hero being the only living surface. The pull is deliberately
+     weaker than the hero's push: this layer sits behind body copy, and
+     anything more assertive would read as movement under the text.
+
+     The canvas is position:fixed and inset:0, so canvas space and viewport
+     space are the same thing and the pointer needs no translation. Pauses
+     when the tab is hidden.
      ---------------------------------------------------------------------- */
   function wireAmbient() {
     var canvas = document.querySelector('.ambient');
@@ -635,6 +758,7 @@
     var dpr = Math.min(window.devicePixelRatio || 1, 2);
     var w = 0, h = 0, pts = [], raf = null, running = false;
     var scrollY = window.scrollY || 0;
+    var R = 190, R2 = R * R;
 
     function resize() {
       w = window.innerWidth; h = window.innerHeight;
@@ -660,11 +784,12 @@
     }
 
     function frame(t) {
+      easePointer(t);
       ctx.clearRect(0, 0, w, h);
 
       // A whisper of parallax: the field lags the page very slightly.
-      var drift = (window.scrollY - scrollY) * .015;
-      scrollY += (window.scrollY - scrollY) * .08;
+      var drift = (pageY - scrollY) * .015;
+      scrollY += (pageY - scrollY) * .08;
 
       for (var i = 0; i < pts.length; i++) {
         var p = pts[i];
@@ -673,22 +798,41 @@
         if (p.y < -8) p.y = h + 8; else if (p.y > h + 8) p.y = -8;
 
         var tw = .6 + .4 * Math.sin(t * .0007 + p.ph);
+        var a = 1, dxr = 0, dyr = 0;
+
+        // Drawn toward the pointer rather than pushed from it. The hero
+        // parts around the cursor; here the field gathers, which keeps the
+        // two surfaces distinguishable instead of doubling one gesture.
+        var dx = ptr.cx - p.x, dy = ptr.cy - p.y;
+        var d2 = dx * dx + dy * dy;
+        if (d2 < R2) {
+          var d = Math.sqrt(d2) || 1;
+          var f = 1 - d / R;
+          var ff = f * f;
+          dxr = (dx / d) * ff * 9;
+          dyr = (dy / d) * ff * 9;
+          a = 1 + ff * 2.4;
+        }
+
+        var px = p.x + dxr, py = p.y + dyr;
+
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.arc(px, py, p.r, 0, Math.PI * 2);
         ctx.fillStyle = p.warm
-          ? 'rgba(242, 145, 63, ' + (.05 * tw).toFixed(3) + ')'
-          : 'rgba(0, 229, 160, ' + (.09 * tw).toFixed(3) + ')';
+          ? 'rgba(242, 145, 63, ' + Math.min(.22, .05 * tw * a).toFixed(3) + ')'
+          : 'rgba(0, 229, 160, ' + Math.min(.34, .09 * tw * a).toFixed(3) + ')';
         ctx.fill();
 
-        // Link only to the next couple of points: O(n·k), never O(n squared).
+        // Link only to the next couple of points: O(n*k), never O(n squared).
         for (var j = i + 1; j < Math.min(i + 3, pts.length); j++) {
           var q = pts[j];
-          var dx = p.x - q.x, dy = p.y - q.y;
-          var d2 = dx * dx + dy * dy;
-          if (d2 > 24000) continue;
+          var lx = px - q.x, ly = py - q.y;
+          var l2 = lx * lx + ly * ly;
+          if (l2 > 24000) continue;
           ctx.beginPath();
-          ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y);
-          ctx.strokeStyle = 'rgba(0, 229, 160, ' + (.035 * (1 - d2 / 24000)).toFixed(3) + ')';
+          ctx.moveTo(px, py); ctx.lineTo(q.x, q.y);
+          ctx.strokeStyle = 'rgba(0, 229, 160, ' +
+            Math.min(.16, .035 * (1 - l2 / 24000) * a).toFixed(3) + ')';
           ctx.lineWidth = .5;
           ctx.stroke();
         }
@@ -707,81 +851,273 @@
 
 
   /* ----------------------------------------------------------------------
-     10. Visitor counter.
+     10. LiDAR panel - a scan, not a picture of one.
 
-     Talks to the same Firestore document the previous site used, so the
-     count carries over rather than restarting. Uses the REST API directly
-     instead of the Firebase SDK: the SDK is well over 100 KB and pulls in a
-     second origin (gstatic.com), where this is a few lines of fetch against
-     one host.
+     The panel used to be several hundred hand-placed SVG circles: a still
+     life of a point cloud, with a readout of three numbers that never moved.
+     This samples an actual volume - a floor and two walls - yaws it slowly,
+     projects it through a single perspective divide, and sweeps a scan band
+     through the depth axis.
 
-     Set PROJECT and KEY below to enable. Left blank, the whole feature is
-     inert and the element stays hidden, so the page never shows a broken or
-     zeroed counter.
+     The X/Y/Z readout is the centroid of whatever the band is currently
+     lighting, so the numbers move because the geometry moved. That is the
+     difference between a readout and a decoration, and it is the only
+     version worth putting on an engineer's portfolio: a fake telemetry
+     display on a page about building real ones would undercut the argument.
 
-     The document is guarded server-side by firestore.rules: read is public,
-     update must be exactly +1 on a single integer field, delete is denied.
-     The sessionStorage check here only avoids double-counting a refresh; it
-     is not the security boundary and is trivially bypassed.
+     Digits refresh at about 8 Hz rather than per frame. Sixty updates a
+     second is unreadable noise; this is the pace real instrument panels
+     settle on, and it lets the eye actually track a value.
+
+     Falls back to the static SVG underneath whenever it cannot run, so the
+     panel is never an empty rectangle.
      ---------------------------------------------------------------------- */
-  var COUNTER = {
-    PROJECT: '',            // Firebase project id
-    KEY:     '',            // Firebase web API key
-    PATH:    'visitors/counter'
-  };
+  function wireLidar() {
+    var panel = document.querySelector('.lidar');
+    var canvas = panel && panel.querySelector('.lidar__canvas');
+    if (!canvas || reduceMotion) return;
 
-  function wireCounter() {
-    var el = document.querySelector('.js-visits');
-    if (!el) return;
-    if (!COUNTER.PROJECT || !COUNTER.KEY) return;   // stays hidden until configured
+    var ctx = canvas.getContext('2d', { alpha: true });
+    if (!ctx) return;
 
-    var base = 'https://firestore.googleapis.com/v1/projects/' + COUNTER.PROJECT +
-               '/databases/(default)/documents';
-    var docPath = base + '/' + COUNTER.PATH;
-    var docName = 'projects/' + COUNTER.PROJECT + '/databases/(default)/documents/' + COUNTER.PATH;
+    var readX = panel.querySelector('.js-lidar-x');
+    var readY = panel.querySelector('.js-lidar-y');
+    var readZ = panel.querySelector('.js-lidar-z');
 
-    function show(n) {
-      if (typeof n !== 'number' || !isFinite(n) || n < 0) return;
-      el.textContent = n.toLocaleString();
-      el.closest('.visits').hidden = false;
-    }
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var w = 0, h = 0, raf = null, running = false;
+    var yaw = 0, pitch = 0, lastRead = 0;
 
-    function read() {
-      return fetch(docPath + '?key=' + COUNTER.KEY, { cache: 'no-store' })
-        .then(function (r) { return r.ok ? r.json() : null; })
-        .then(function (d) {
-          var v = d && d.fields && d.fields.count && d.fields.count.integerValue;
-          return v == null ? null : parseInt(v, 10);
+    /* Sampled geometry. A floor with a slight undulation plus two walls
+       reads as a corner of a room; a sphere of random points reads as
+       noise, which is what most decorative "point clouds" actually are. */
+    var pts = [];
+    (function build() {
+      var i, u, v;
+      for (i = 0; i < 165; i++) {                       // floor
+        u = (i % 15) / 14; v = Math.floor(i / 15) / 10;
+        pts.push({
+          x: (u - .5) * 2.3,
+          y: -.55 + Math.sin(u * 5.2 + v * 3.1) * .045,
+          z: v * 2.5 - .45
         });
+      }
+      for (i = 0; i < 55; i++) {                        // left wall
+        u = (i % 11) / 10; v = Math.floor(i / 11) / 4;
+        pts.push({ x: -1.15, y: -.55 + v * 1.05, z: u * 2.5 - .45 });
+      }
+      for (i = 0; i < 55; i++) {                        // back wall
+        u = (i % 11) / 10; v = Math.floor(i / 11) / 4;
+        pts.push({ x: (u - .5) * 2.3, y: -.55 + v * 1.05, z: 2.05 });
+      }
+    })();
+
+    function resize() {
+      var r = canvas.getBoundingClientRect();
+      w = r.width; h = r.height;
+      if (!w || !h) return;
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
 
-    function bump() {
-      return fetch(base + ':commit?key=' + COUNTER.KEY, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          writes: [{
-            update: { name: docName, fields: {} },
-            updateMask: { fieldPaths: [] },          // touch no ordinary field
-            updateTransforms: [{ fieldPath: 'count', increment: { integerValue: '1' } }],
-            currentDocument: { exists: true }
-          }]
-        })
-      });
+    function frame(t) {
+      easePointer(t);
+      if (!w || !h) { resize(); }
+      ctx.clearRect(0, 0, w, h);
+
+      // Constant slow drift, plus an eased offset the pointer steers. The
+      // drift is what keeps it alive when nobody is touching it.
+      var target = (ptr.x - .5) * .85;
+      yaw += (target - yaw) * .045;
+      pitch += (.52 + (ptr.y - .5) * .16 - pitch) * .045;
+
+      var a = t * .00007 + yaw;
+      var ca = Math.cos(a), sa = Math.sin(a);
+      var cp = Math.cos(pitch), sp = Math.sin(pitch);
+
+      var cx = w / 2, cy = h / 2 + h * .12;
+      var fov = h * 1.9, dist = 3.15;
+
+      // The scan band sweeping the depth axis, and the accumulator that
+      // turns whatever it lights into the readout.
+      var bandZ = -.5 + ((t * .00028) % 1) * 3.05;
+      var sx = 0, sy = 0, sz = 0, lit = 0;
+
+      for (var i = 0; i < pts.length; i++) {
+        var p = pts[i];
+
+        var zc = p.z - 1;                    // centre the volume before yaw
+        var x1 = p.x * ca + zc * sa;
+        var z1 = zc * ca - p.x * sa;
+        var y2 = p.y * cp - z1 * sp;
+        var z2 = p.y * sp + z1 * cp;
+
+        var d = z2 + dist;
+        if (d < .35) continue;               // behind the near plane
+
+        var k = fov / d;
+        var px = cx + x1 * k;
+        var py = cy - y2 * k;
+        if (px < -4 || px > w + 4 || py < -4 || py > h + 4) continue;
+
+        // Depth cue: near points larger and brighter, far points recede.
+        var near = (4.5 - d) / 2.4;
+        near = near < 0 ? 0 : near > 1 ? 1 : near;
+
+        var db = Math.abs(p.z - bandZ);
+        var glow = db < .2 ? (1 - db / .2) : 0;
+        glow *= glow;
+
+        if (glow > .05) {
+          sx += p.x; sy += p.y; sz += p.z; lit++;
+        }
+
+        var alpha = .1 + near * .34 + glow * .55;
+        var size = .5 + near * .85 + glow * .9;
+
+        ctx.beginPath();
+        ctx.arc(px, py, size, 0, Math.PI * 2);
+        ctx.fillStyle = glow > .25
+          ? 'rgba(150, 255, 220, ' + (alpha > 1 ? 1 : alpha).toFixed(3) + ')'
+          : 'rgba(0, 229, 160, ' + (alpha > 1 ? 1 : alpha).toFixed(3) + ')';
+        ctx.fill();
+      }
+
+      if (lit && readX && t - lastRead > 120) {
+        lastRead = t;
+        // Scaled to plausible metres. The value is the band centroid, so it
+        // tracks the sweep and the yaw rather than a random walk.
+        readX.textContent = 'X: ' + (sx / lit * 5.4 + 12.4).toFixed(2) + ' m';
+        readY.textContent = 'Y: ' + (sy / lit * 5.4 - 8.2).toFixed(2) + ' m';
+        readZ.textContent = 'Z: ' + (sz / lit * 1.35 + 1.6).toFixed(2) + ' m';
+      }
+
+      raf = requestAnimationFrame(frame);
     }
 
-    var KEY = 'np_visit_counted';
-    var counted = false;
-    try { counted = sessionStorage.getItem(KEY) === '1'; } catch (e) { counted = true; }
+    function start() { if (!running) { running = true; raf = requestAnimationFrame(frame); } }
+    function stop()  { if (running) { running = false; cancelAnimationFrame(raf); } }
 
-    read().then(function (n) {
-      if (n === null) return;
-      if (counted) { show(n); return; }
-      show(n + 1);                                   // optimistic, so it never lags
-      return bump().then(function () {
-        try { sessionStorage.setItem(KEY, '1'); } catch (e) {}
+    window.addEventListener('resize', resize);
+    document.addEventListener('visibilitychange', function () { document.hidden ? stop() : start(); });
+
+    resize();
+    panel.classList.add('is-live');   // hands the panel over from the static SVG
+
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (e) {
+        e[0].isIntersecting ? start() : stop();
+      }, { threshold: .01 }).observe(canvas);
+    } else {
+      start();
+    }
+  }
+
+  /* ----------------------------------------------------------------------
+     11. Card tilt.
+
+     A small parallax on the story cards: the card leans a few
+     degrees away from the cursor, which reads as the card having thickness.
+     The rotation is written as two custom properties and composed in CSS
+     alongside the hover lift, so there is exactly one transform on the
+     element and the two effects cannot fight each other.
+
+     Pointer-only and motion-sensitive. On touch, `:hover` still gives the
+     lift, so nothing is lost - a tilt keyed to a cursor that does not exist
+     would either never fire or stick on after a tap.
+     ---------------------------------------------------------------------- */
+  function wireTilt() {
+    if (reduceMotion || !finePointer) return;
+
+    var cards = document.querySelectorAll('.story');
+    if (!cards.length) return;
+
+    Array.prototype.forEach.call(cards, function (card) {
+      var box = null;
+
+      card.addEventListener('pointerenter', function () {
+        box = card.getBoundingClientRect();
+        card.classList.add('is-tilting');
       });
-    }).catch(function () { /* a counter is never worth breaking a page over */ });
+
+      card.addEventListener('pointermove', function (e) {
+        if (!box) box = card.getBoundingClientRect();
+        // -0.5 at one edge, +0.5 at the other.
+        card.style.setProperty('--tx', ((e.clientX - box.left) / box.width - .5).toFixed(3));
+        card.style.setProperty('--ty', ((e.clientY - box.top) / box.height - .5).toFixed(3));
+      }, { passive: true });
+
+      card.addEventListener('pointerleave', function () {
+        card.classList.remove('is-tilting');
+        card.style.setProperty('--tx', '0');
+        card.style.setProperty('--ty', '0');
+        box = null;
+      });
+
+      // A card can also scroll out from under a held pointer, and the rail
+      // scrolls horizontally under the cursor constantly. Re-measuring on
+      // the next enter is enough; dropping the stale box here avoids
+      // tilting against a rectangle that has since moved.
+      card.addEventListener('pointercancel', function () {
+        card.classList.remove('is-tilting');
+        box = null;
+      });
+    });
+  }
+
+  /* ----------------------------------------------------------------------
+     12. Metric count-up.
+
+     The four figures in the metrics band are the one place on the page where
+     a reader is expected to stop for a beat, and they were arriving as static
+     type. Counting them up on entry buys that beat honestly - the number
+     lands on exactly what the markup says, so nothing is being dramatised.
+
+     The suffix is preserved rather than re-derived: "52+" counts to 52 and
+     keeps its plus. The band is already tabular-nums, so the width does not
+     twitch as digits change.
+
+     Under reduced motion the function never runs and the markup stands as
+     written, which is why the final value lives in the HTML rather than in
+     a data attribute - with no script at all, the numbers are simply there.
+     ---------------------------------------------------------------------- */
+  function wireCountUp() {
+    if (reduceMotion || !('IntersectionObserver' in window)) return;
+
+    var nums = document.querySelectorAll('.metric b');
+    if (!nums.length) return;
+
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        io.unobserve(entry.target);
+        run(entry.target);
+      });
+    }, { threshold: .6 });
+
+    function run(el) {
+      var m = /^(\d+)(.*)$/.exec(el.textContent.trim());
+      if (!m) return;                         // anything unparsed is left alone
+      var target = parseInt(m[1], 10);
+      var suffix = m[2];
+      if (!isFinite(target) || target <= 0) return;
+
+      var DUR = 900, t0 = 0;
+
+      function step(t) {
+        if (!t0) t0 = t;
+        var p = Math.min(1, (t - t0) / DUR);
+        var eased = 1 - Math.pow(1 - p, 3);   // ease-out: fast start, soft landing
+        el.textContent = Math.round(target * eased) + suffix;
+        if (p < 1) requestAnimationFrame(step);
+        else el.textContent = target + suffix;   // land exactly on the markup
+      }
+      el.textContent = '0' + suffix;
+      requestAnimationFrame(step);
+    }
+
+    nums.forEach(function (el) { io.observe(el); });
   }
 
   function init() {
@@ -794,7 +1130,9 @@
     wireYear();
     wireNarrative();
     wireAmbient();
-    wireCounter();
+    wireLidar();
+    wireTilt();
+    wireCountUp();
   }
 
   if (document.readyState === 'loading') {

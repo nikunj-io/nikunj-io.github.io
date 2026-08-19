@@ -11,7 +11,7 @@
   <meta name="theme-color" content="#050a0f">
   <meta name="color-scheme" content="dark">
   <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self' 'sha256-fIUZVR2W5ka/LeXlWY0uUHX9w1IHIa3kfSYg5ccMqmE='; font-src 'self'; connect-src https://firestore.googleapis.com; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; upgrade-insecure-requests">
+        content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self' 'sha256-ieCm7yhJU5+0/Xff0Bz+ze/PsrJ8YOic8ViZxe//tyk='; script-src-attr 'none'; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; upgrade-insecure-requests">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta property="og:type" content="article">
   <meta property="og:title" content="When the network disappears, the work shouldn't.">
@@ -21,7 +21,7 @@
   <meta property="og:image" content="https://nikunj-io.github.io/assets/img/portrait.jpg">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="../css/site.css?v=30">
+  <link rel="stylesheet" href="../css/site.css?v=34">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -106,7 +106,7 @@
       <section class="band">
         <div class="wrap band__grid">
           <div class="band__text reveal">
-            <p class="band__label">The problem</p>
+            <h2 class="band__label">The problem</h2>
             <p>The reflex is to treat offline as an error. Show a spinner, block the
               screen, tell people to try again later. That turns a coverage problem into
               a work stoppage, and it puts the network between someone and their job.</p>
@@ -131,7 +131,7 @@
       <!-- Step-by-step walk through that diagram -->
       <section class="band band--alt">
         <div class="wrap">
-          <p class="band__label reveal">How it behaves when coverage drops</p>
+          <h2 class="band__label reveal">How it behaves when coverage drops</h2>
           <ol class="steps">
             <li class="step">
               <span class="step__n">01</span>
@@ -193,7 +193,7 @@
             <p class="arch__node arch__node--wide">UI <small>never waits on the network</small></p>
           </div></figure>
           <div class="band__text reveal">
-            <p class="band__label">The approach</p>
+            <h2 class="band__label">The approach</h2>
             <p>So the local store becomes the source of truth. Reads and writes land
               locally and return straight away. Syncing happens in the background and
               reconciles later, rather than sitting in front of the user as a gate.</p>
@@ -210,14 +210,14 @@
       <!-- What was actually difficult -->
       <section class="band band--alt">
         <div class="wrap sp__hard reveal">
-          <p class="band__label">The part that took the longest</p>
+          <h2 class="band__label">The part that took the longest</h2>
           <p class="sp__hardText">Reconciliation. Two people editing the same record in different places have to converge to the same answer, and that answer has to be defensible without a human adjudicating it.</p>
         </div>
       </section>
 
       <section class="band">
         <div class="wrap">
-          <p class="band__label reveal">What the work involved</p>
+          <h2 class="band__label reveal">What the work involved</h2>
           <ul class="facts reveal"><li class="fact"><strong>The constraint</strong><p>Connectivity can't be a prerequisite for doing the job.</p></li>
           <li class="fact"><strong>The engineering</strong><p>Local persistence, a sync engine, retry and conflict handling built around the workflow.</p></li>
           <li class="fact"><strong>The ownership</strong><p>Architecture, iOS implementation, performance and platform standards.</p></li>
@@ -242,11 +242,7 @@
 
   <footer class="site-footer">
     <p>© <span class="js-year">2026</span> Nikunj Prajapati</p>
-    <p class="visits" hidden>
-      <span class="visits__dot" aria-hidden="true"></span>
-      <span class="js-visits">0</span> visits
-    </p>
   </footer>
-  <script src="../js/site.js?v=20" defer></script>
+  <script src="../js/site.js?v=34" defer></script>
 </body>
 </html>

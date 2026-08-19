@@ -11,7 +11,7 @@
   <meta name="theme-color" content="#050a0f">
   <meta name="color-scheme" content="dark">
   <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self' 'sha256-6abhT6iFMbBdZp/lwvezkG7DTHPThDK9L7r0P7jwGgE='; font-src 'self'; connect-src https://firestore.googleapis.com; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; upgrade-insecure-requests">
+        content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self' 'sha256-XHQfvvJ8L01ZRmhJaGF7r7pSvhWwRSj6HP5irB69Ruk='; script-src-attr 'none'; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; upgrade-insecure-requests">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta property="og:type" content="article">
   <meta property="og:title" content="An assistant is useful when it can do something.">
@@ -21,7 +21,7 @@
   <meta property="og:image" content="https://nikunj-io.github.io/assets/img/portrait.jpg">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="../css/site.css?v=30">
+  <link rel="stylesheet" href="../css/site.css?v=34">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -111,7 +111,7 @@
       <section class="band">
         <div class="wrap band__grid">
           <div class="band__text reveal">
-            <p class="band__label">The problem</p>
+            <h2 class="band__label">The problem</h2>
             <p>Once a model can trigger real actions, the engineering problem stops being
               about prompts. It becomes a question of boundaries. Which tools exist, what
               each one is allowed to touch, what gets checked before anything commits, and
@@ -137,7 +137,7 @@
       <!-- Step-by-step walk through that diagram -->
       <section class="band band--alt">
         <div class="wrap">
-          <p class="band__label reveal">How a request becomes an action</p>
+          <h2 class="band__label reveal">How a request becomes an action</h2>
           <ol class="steps">
             <li class="step">
               <span class="step__n">01</span>
@@ -197,7 +197,7 @@
             <p class="flow__step flow__step--work">ASK, DON'T ACT <b>no silent failure</b></p>
           </div></figure>
           <div class="band__text reveal">
-            <p class="band__label">The approach</p>
+            <h2 class="band__label">The approach</h2>
             <p>So the model proposes and the code decides. Intent gets parsed into a
               structured call against a fixed set of tools. Business rules validate that
               call in ordinary code, the same rules guarding every other path into the
@@ -214,14 +214,14 @@
       <!-- What was actually difficult -->
       <section class="band band--alt">
         <div class="wrap sp__hard reveal">
-          <p class="band__label">The part that took the longest</p>
+          <h2 class="band__label">The part that took the longest</h2>
           <p class="sp__hardText">The validation layer. Making the failure mode a refusal rather than a wrong action is what decides whether the feature can ship at all.</p>
         </div>
       </section>
 
       <section class="band">
         <div class="wrap">
-          <p class="band__label reveal">What the work involved</p>
+          <h2 class="band__label reveal">What the work involved</h2>
           <ul class="facts reveal"><li class="fact"><strong>The constraint</strong><p>A model that will sometimes be confidently wrong.</p></li>
           <li class="fact"><strong>The engineering</strong><p>A fixed tool surface, schema-checked calls, and policy validation in ordinary code.</p></li>
           <li class="fact"><strong>The ownership</strong><p>Agent architecture, the safety boundary and the audit trail.</p></li>
@@ -246,11 +246,7 @@
 
   <footer class="site-footer">
     <p>© <span class="js-year">2026</span> Nikunj Prajapati</p>
-    <p class="visits" hidden>
-      <span class="visits__dot" aria-hidden="true"></span>
-      <span class="js-visits">0</span> visits
-    </p>
   </footer>
-  <script src="../js/site.js?v=20" defer></script>
+  <script src="../js/site.js?v=34" defer></script>
 </body>
 </html>

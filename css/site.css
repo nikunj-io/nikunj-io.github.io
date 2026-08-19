@@ -9,8 +9,15 @@
 
   --text:        #e8eef5;
   --text-muted:  #8fa1b5;
-  --text-dim:    #6b7f96;
-  --text-faint:  #4b5c72;
+  /* --text-dim and --text-faint are used at 9-13px throughout, so WCAG's
+     large-text allowance never applies to them and both must clear 4.5:1.
+     The previous values (#6b7f96 / #4b5c72) measured 4.33 and 2.61 against
+     --surface-2, the lightest ground either sits on. These clear it on the
+     same hue while keeping the three-step order intact - muted 6.74, dim
+     5.42, faint 4.63 - because raising both to the bare minimum made faint
+     the lighter of the two and inverted the hierarchy. */
+  --text-dim:    #7990aa;
+  --text-faint:  #6b84a3;
 
   --accent:      #00e5a0;
   --accent-2:    #22d3ee;
@@ -74,7 +81,16 @@ button { font: inherit; }
 a { color: inherit; text-decoration: none; }
 a:hover { color: var(--accent); }
 
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: var(--r-sm); }
+/* Two rings: a solid one that meets the 3:1 non-text contrast minimum on
+   every surface here, and a soft halo that makes the focused element read as
+   lifted rather than merely outlined. The halo is decorative - remove it and
+   the indicator still conforms. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: var(--r-sm);
+  box-shadow: 0 0 0 5px rgba(0, 229, 160, .14);
+}
 
 .sr-only {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
@@ -95,8 +111,56 @@ a:hover { color: var(--accent); }
    ========================================================================= */
 .wrap { width: 100%; max-width: var(--wrap); margin-inline: auto; padding-inline: var(--s-5); }
 
-.section { padding-block: var(--s-8); }
-.section--band { background: var(--bg-2); border-block: 1px solid var(--hairline); }
+/* Sections breathe at viewport scale rather than at a fixed 4rem. The long
+   scroll is the argument here, and a tighter rhythm made three distinct
+   sections read as one continuous wall of content. */
+.section { padding-block: clamp(4.5rem, 8.5vw, 7.5rem); }
+/* Ground gradients, not a flat fill. --bg and --bg-2 differ by 2/4/6 per
+   channel, so alternating between them was invisible and the body of the page
+   read as one unbroken slab with hairlines ruled across it. Each band now
+   carries two very wide, very low-opacity washes anchored to opposite corners,
+   which is the same device the hero uses and the reason the hero looks like it
+   has depth. --gx flips per section so consecutive bands lean opposite ways.
+
+   Alphas are set from the contrast budget, not by eye: 4.3% and 2.5% are the
+   strongest values at which --text-faint still clears 4.5:1 where BOTH washes
+   coincide at full strength. The anchors are on opposite corners so that
+   overlap is nearly impossible in practice, but the budget is computed against
+   it anyway - a gradient that only passes in the places it happens to be weak
+   is not a passing gradient. */
+.section--band {
+  position: relative;
+  --gx: 18%;
+  background:
+    radial-gradient(ellipse 78% 62% at var(--gx) 0%,
+                    rgba(0, 229, 160, .043), transparent 60%),
+    radial-gradient(ellipse 66% 58% at calc(100% - var(--gx)) 100%,
+                    rgba(34, 211, 238, .025), transparent 64%),
+    var(--bg-2);
+}
+
+/* Consecutive bands lean opposite ways, so stories -> systems and metrics ->
+   problems stop reading as two identical rectangles stacked. */
+#stories  { --gx: 80%; }
+#systems  { --gx: 14%; }
+#about    { --gx: 72%; }
+
+/* Seams. A hard 1px rule between two near-identical fills reads as a box
+   edge; worse, two adjacent bands each drew one, giving a 2px line. One
+   gradient hairline per band, strongest in the middle and fading out at the
+   page edges, reads as a join instead. */
+.section--band::before {
+  content: ''; position: absolute; inset: 0 0 auto 0; height: 1px;
+  background: linear-gradient(90deg,
+    transparent, var(--hairline) 18%, var(--hairline-2) 50%, var(--hairline) 82%, transparent);
+  pointer-events: none;
+}
+.section--band::after {
+  content: ''; position: absolute; inset: auto 0 0 0; height: 1px;
+  background: linear-gradient(90deg,
+    transparent, var(--hairline) 22%, var(--hairline) 78%, transparent);
+  pointer-events: none;
+}
 
 .eyebrow {
   font-size: .6875rem; font-weight: 600; letter-spacing: .2em;
@@ -106,7 +170,7 @@ a:hover { color: var(--accent); }
 
 .section-head {
   display: flex; flex-wrap: wrap; align-items: flex-end;
-  justify-content: space-between; gap: var(--s-4); margin-bottom: var(--s-6);
+  justify-content: space-between; gap: var(--s-4); margin-bottom: var(--s-7);
 }
 
 .mt-3 { margin-top: var(--s-3); }
@@ -137,12 +201,18 @@ a:hover { color: var(--accent); }
   color: var(--text-muted); transition: color var(--dur-fast) var(--ease);
   display: inline-flex; align-items: center; gap: var(--s-2);
 }
+.nav__link:hover { color: var(--text); }
 .nav__link::after {
   content: ''; position: absolute; left: 0; bottom: -6px;
   width: 0; height: 1px; background: var(--accent);
-  transition: width var(--dur) var(--ease);
+  /* The glow is what separates this from a plain underline; it is carried
+     by the rule itself so nothing else has to paint. */
+  box-shadow: 0 0 8px rgba(0, 229, 160, .7);
+  transition: width var(--dur) var(--ease), opacity var(--dur) var(--ease);
 }
 .nav__link:hover::after, .nav__link[aria-current="true"]::after { width: 100%; }
+.nav__link:hover .nav__dot { opacity: .5; }
+.nav__link:active { transform: translateY(1px); }
 .nav__link[aria-current="true"] { color: var(--accent); }
 .nav__link[aria-current="true"] .nav__dot { opacity: 1; }
 .nav__dot {
@@ -153,8 +223,21 @@ a:hover { color: var(--accent); }
 
 .status-pill {
   display: inline-flex; align-items: center; gap: var(--s-2);
+  padding: 6px 13px;
+  border: 1px solid var(--accent-line); border-radius: var(--r-full);
+  background: rgba(0, 229, 160, .05);
   font-size: .6875rem; letter-spacing: .1em; color: var(--accent); white-space: nowrap;
+  transition: background var(--dur-fast) var(--ease),
+              border-color var(--dur-fast) var(--ease),
+              transform var(--dur-fast) var(--ease);
 }
+.status-pill:hover {
+  color: var(--accent);
+  background: rgba(0, 229, 160, .11);
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+.status-pill:active { transform: translateY(0); }
 .status-dot {
   width: 6px; height: 6px; flex: none; border-radius: var(--r-full);
   background: var(--accent); box-shadow: 0 0 8px var(--accent);
@@ -242,9 +325,33 @@ a:hover { color: var(--accent); }
   border-radius: var(--r-lg);
   background: var(--surface-1);
   overflow: hidden;
-  transition: transform var(--dur) var(--ease), border-color var(--dur) var(--ease);
+  /* --tx / --ty are written by the tilt module as -0.5..0.5. They default to
+     0 here so the card composes correctly before any pointer arrives, and on
+     touch, where the module never runs at all. */
+  --tx: 0; --ty: 0;
+  transform: perspective(1000px);
+  transition: transform var(--dur) var(--ease),
+              border-color var(--dur) var(--ease),
+              box-shadow var(--dur) var(--ease);
 }
-.story:hover, .story:focus-within { transform: translateY(-4px); border-color: var(--accent-line); }
+.story:hover, .story:focus-within {
+  transform: perspective(1000px) translateY(-4px);
+  border-color: var(--accent-line);
+  box-shadow: 0 26px 52px -22px rgba(0, 0, 0, .85);
+}
+
+/* Tilt composes into the same transform as the lift, so the two can never
+   overwrite each other. It follows the hover rule so it wins while the
+   pointer is inside the card, and the shorter transition lets the lean track
+   the cursor instead of lagging behind it. */
+.story.is-tilting {
+  transform: perspective(1000px)
+             translateY(-6px)
+             rotateX(calc(var(--ty) * -5deg))
+             rotateY(calc(var(--tx) * 7deg));
+  transition-duration: 140ms;
+  will-change: transform;
+}
 
 .story__link { display: flex; flex-direction: column; width: 100%; }
 .story__link:hover { color: inherit; }
@@ -590,9 +697,21 @@ a:hover { color: var(--accent); }
   background: var(--accent); color: var(--bg);
   font-weight: 600; font-size: .875rem; letter-spacing: .06em;
   box-shadow: 0 8px 26px rgba(0,229,160,.18);
-  transition: background var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+  transition: background var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease),
+              box-shadow var(--dur) var(--ease);
 }
-.btn:hover { background: var(--accent-dim); color: var(--bg); transform: translateY(-1px); }
+.btn:hover {
+  background: var(--accent-dim); color: var(--bg);
+  transform: translateY(-2px);
+  box-shadow: 0 14px 34px rgba(0, 229, 160, .26);
+}
+/* A press state, not just a hover state: without it the button feels like a
+   picture of a button on every click. */
+.btn:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 14px rgba(0, 229, 160, .2);
+  transition-duration: 90ms;
+}
 .btn svg { width: 14px; height: 14px; }
 
 .contact__list { margin-top: var(--s-6); display: grid; gap: var(--s-3); }
@@ -602,9 +721,24 @@ a:hover { color: var(--accent); }
 /* =========================================================================
    FOOTER
    ========================================================================= */
+/* The footer is the last thing anyone sees and it was a hairline and one
+   line of grey. It keeps the same content - nothing invented - but gets the
+   page's own vocabulary: a gradient seam that fades at the edges like the
+   band joins above it, and a faint accent bloom rising from the top edge so
+   the page closes rather than simply stopping. */
 .site-footer {
-  border-top: 1px solid var(--hairline); padding-block: var(--s-5);
+  position: relative;
+  border-top: 0;
+  padding-block: var(--s-7);
   text-align: center; font-size: .75rem; color: var(--text-faint);
+  background: radial-gradient(ellipse 60% 100% at 50% 0%,
+                              rgba(0, 229, 160, .045), transparent 68%);
+}
+.site-footer::before {
+  content: ''; position: absolute; inset: 0 0 auto 0; height: 1px;
+  background: linear-gradient(90deg,
+    transparent, var(--hairline) 20%, var(--accent-line) 50%, var(--hairline) 80%, transparent);
+  pointer-events: none;
 }
 .site-footer p + p { margin-top: var(--s-2); }
 
@@ -629,9 +763,6 @@ a:hover { color: var(--accent); }
 @media (min-width: 900px) {
       .rail { grid-auto-flow: row; grid-template-columns: repeat(5, 1fr); overflow-x: visible; }
   .rail__btn { display: none; }
-}
-
-@media (max-width: 899px) {
 }
 
 @media (max-width: 767px) {
@@ -687,7 +818,12 @@ a:hover { color: var(--accent); }
 }
 
 @media print {
-  .site-header, .telemetry, .scroll-cue, .nav-toggle, .rail__btn,   body { background: #fff; color: #000; }
+  /* These four selectors previously shared a declaration block with body,
+     which printed the site chrome as white rectangles rather than removing
+     it. They are page furniture; on paper they are noise. */
+  .site-header, .nav-toggle, .rail__btn, .hero__scroll,
+  .ambient, .hero__field, .lidar { display: none !important; }
+  body { background: #fff; color: #000; }
 }
 
 /* =========================================================================
@@ -908,7 +1044,17 @@ a:hover { color: var(--accent); }
 /* =========================================================================
    METRICS BAND
    ========================================================================= */
-.metrics { border-block: 1px solid var(--hairline); background: var(--bg-2); }
+.metrics {
+  position: relative;
+  background:
+    radial-gradient(ellipse 70% 120% at 50% 0%, rgba(0, 229, 160, .05), transparent 62%),
+    var(--bg-2);
+}
+.metrics::before, .metrics::after {
+  content: ''; position: absolute; inset: 0 0 auto 0; height: 1px; pointer-events: none;
+  background: linear-gradient(90deg, transparent, var(--hairline-2) 50%, transparent);
+}
+.metrics::after { inset: auto 0 0 0; }
 .metrics__grid { display: grid; grid-template-columns: repeat(2, 1fr); }
 .metric { padding: var(--s-5) var(--s-5); border-right: 1px solid var(--hairline); }
 .metric:last-child { border-right: 0; }
@@ -1178,7 +1324,12 @@ body::before {
   width: 100%; height: 100%;
   z-index: 0; pointer-events: none;
 }
-body > main, body > .site-header, body > .site-footer { position: relative; z-index: 1; }
+/* These sit above the ambient field. The header is deliberately NOT in this
+   list: it is position:fixed, and because this rule is both later in the file
+   and more specific (0,1,1 against 0,1,0) including it here silently replaced
+   fixed with relative and the header scrolled away with the page. It needs the
+   stacking order only. */
+body > main, body > .site-footer { position: relative; z-index: 1; }
 body > .site-header { z-index: 50; }
 
 @media (prefers-reduced-motion: reduce) { .ambient { display: none; } }
@@ -1330,12 +1481,21 @@ body > .site-header { z-index: 50; }
 .band--alt { background: var(--bg-2); }
 
 .band__grid { display: grid; gap: var(--s-6); align-items: center; }
+/* These are <h2> so each band is a real section with a name, rather than an
+   h1 followed by a run of h3 step names. They are headings semantically and
+   labels visually, so line-height and font-weight are restated here to hold
+   off the global h1-h4 rule. */
 .band__label {
   font-family: var(--font-mono);
   font-size: .5625rem; letter-spacing: .18em; text-transform: uppercase;
+  font-weight: 400; line-height: 1.6;
   color: var(--accent);
   margin-bottom: var(--s-4);
 }
+/* Scoped to the type so it cannot reach .band__label. As <p>, the two labels
+   inside .band__text lost to this rule on specificity and rendered as 1rem
+   muted body copy instead of small accent mono - the two never matched the
+   three labels outside it. */
 .band__text p { color: var(--text-muted); font-size: 1rem; line-height: 1.7; }
 .band__text p + p { margin-top: var(--s-4); }
 
@@ -1563,20 +1723,6 @@ body > .site-header { z-index: 50; }
 
 /* Visitor counter. Hidden until the fetch succeeds, so a failed or
    unconfigured request shows nothing rather than a zero. */
-.visits {
-  display: inline-flex; align-items: center; gap: var(--s-2);
-  margin-top: var(--s-2);
-  font-family: var(--font-mono);
-  font-size: .5625rem; letter-spacing: .14em; text-transform: uppercase;
-  color: var(--text-faint);
-}
-.visits[hidden] { display: none; }
-.visits__dot {
-  width: 5px; height: 5px; border-radius: var(--r-full);
-  background: var(--accent); box-shadow: 0 0 7px var(--accent);
-  animation: pulse 2.4s ease-in-out infinite;
-}
-.js-visits { color: var(--accent); }
 
 /* Portrait on the evolution header. The figure is cropped to the frame and
    faded on its inner edge so it sits in the panel rather than on top of it. */
@@ -1759,4 +1905,95 @@ body > .site-header { z-index: 50; }
   .js .step, .js .fact, .js .mile, .js .evoStats li { animation: none; opacity: 1; transform: none; }
   .js .reveal { opacity: 1; transform: none; }
   .figpanel svg polyline { stroke-dasharray: none; stroke-dashoffset: 0; animation: none; }
+}
+
+
+/* =========================================================================
+   HERO PARALLAX LAYERS
+   The hero field writes --hx / --hy on the section once per frame, both in
+   the range -0.5..0.5. Each layer reads the same pair at a different rate
+   and in a different direction, which is what produces depth: the far
+   decorations swing wide, the portrait barely moves, and the panel in front
+   counter-moves. One shared input, four different responses.
+
+   Desktop only. Below 1100px the hero relayouts into a column, the layers
+   stop overlapping, and moving them relative to each other has nothing left
+   to describe.
+   ========================================================================= */
+@media (min-width: 1100px) {
+  .hero { --hx: 0; --hy: 0; }
+
+  .hero__deco,
+  .hero__figure,
+  .lidar {
+    /* Long transition, short input: the JS eases --hx/--hy per frame, and
+       this second easing removes what is left of the step between frames.
+       transform only, so every layer stays on the compositor. */
+    transition: transform 900ms cubic-bezier(.22, .61, .36, 1);
+  }
+
+  .hero__deco   { transform: translate3d(calc(var(--hx) * -30px), calc(var(--hy) * -20px), 0); }
+  .hero__figure { transform: translate3d(calc(var(--hx) *  10px), calc(var(--hy) *   7px), 0); }
+  .lidar        { transform: translate3d(calc(var(--hx) * -20px), calc(var(--hy) * -13px), 0); }
+}
+
+/* =========================================================================
+   LIDAR PANEL
+   The static SVG and the live canvas occupy the same box. The canvas is
+   hidden until the script confirms it can actually paint, so a failed or
+   disabled script leaves the fallback showing rather than a blank panel.
+   ========================================================================= */
+.lidar__graph { position: relative; height: 86px; }
+.lidar__graph svg,
+.lidar__canvas {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%; display: block;
+}
+.lidar__canvas { opacity: 0; transition: opacity 600ms var(--ease); }
+.lidar.is-live .lidar__canvas { opacity: 1; }
+.lidar.is-live .lidar__static { opacity: 0; }
+.lidar__static { transition: opacity 600ms var(--ease); }
+
+/* Tabular figures: the readout changes several times a second, and
+   proportional digits make the whole line twitch sideways on every update. */
+.lidar__read { font-variant-numeric: tabular-nums; }
+
+/* =========================================================================
+   STAGGERED ENTRANCES
+   Every .reveal in a group crosses the viewport threshold within a frame or
+   two of its siblings, so without a delay a row of six arrives as one block.
+   The delay is on the .is-visible state, which means it costs nothing until
+   the element is actually animating, and it is measured in the same units as
+   a glance moving along the row.
+   ========================================================================= */
+.js .stagger > .reveal.is-visible:nth-child(1) { transition-delay: 0ms; }
+.js .stagger > .reveal.is-visible:nth-child(2) { transition-delay: 70ms; }
+.js .stagger > .reveal.is-visible:nth-child(3) { transition-delay: 140ms; }
+.js .stagger > .reveal.is-visible:nth-child(4) { transition-delay: 210ms; }
+.js .stagger > .reveal.is-visible:nth-child(5) { transition-delay: 280ms; }
+.js .stagger > .reveal.is-visible:nth-child(6) { transition-delay: 350ms; }
+.js .stagger > .reveal.is-visible:nth-child(n+7) { transition-delay: 420ms; }
+
+/* =========================================================================
+   PREFERENCES - additions for the interactive layers above
+   Kept last so it wins on source order as well as on !important. Everything
+   added in this pass is motion; under a reduced-motion preference the page
+   must present as the same design standing still, not as a degraded one.
+   ========================================================================= */
+@media (prefers-reduced-motion: reduce) {
+  .js .stagger > .reveal.is-visible { transition-delay: 0ms !important; }
+
+  .hero__deco, .hero__figure, .lidar { transform: none !important; }
+
+  .story, .story:hover, .story:focus-within, .story.is-tilting {
+    transform: none !important;
+  }
+
+  /* The canvas never starts under reduced motion, so hand the panel back to
+     the static fallback rather than fading to an empty box. */
+  .lidar__canvas { display: none; }
+  .lidar.is-live .lidar__static { opacity: 1; }
+
+  .btn:hover, .btn:active, .status-pill:hover, .status-pill:active,
+  .nav__link:active { transform: none; }
 }
